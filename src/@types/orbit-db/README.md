@@ -1,1 +1,0 @@
-This directory contains orbit-db typings created by me.

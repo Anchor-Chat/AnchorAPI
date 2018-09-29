@@ -23,15 +23,14 @@ describe("AnchorAPI", () => {
             node.on('error', done);
             node.on("ready", async () => {
                 new AnchorAPIBuilder(genAnchorConfig(node))
+                .setIPFS(node)
                 .setLoginAndPassword("lukas2005", "lukasz2005")
-                .login(async (anchor) => {
-                    assert.notEqual(anchor.db, null);
-                    assert.notEqual(anchor.db, undefined);
-    
+                .createAccount()
+                .then(async (anchor) => {
 
                     await anchor.close();
                     await node.stop();
-                    rimraf.sync("./orbitdb");
+                    //rimraf.sync("./orbitdb");
                     
                     //if (fs.existsSync(ipfsOptions.path)) rimraf.sync(ipfsOptions.path);
 

@@ -6,7 +6,7 @@
   "types": "dist/inde.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && mocha --timeout 10000",
+    "test": "npm run build && mocha --timeout 200000",
     "prepare": "npm run build && require-self"
   },
   "repository": {
@@ -25,21 +25,20 @@
   },
   "homepage": "https://github.com/Anchor-Chat/AnchorAPI#readme",
   "devDependencies": {
-    "@types/assert": "0.0.31",
+    "@types/node": "^10.11.2",
     "mocha": "^5.2.0",
     "require-self": "^0.2.1",
-    "rimraf": "^2.6.2",
-    "typescript": "^3.0.3"
+    "ts-node": "^7.0.1",
+    "typescript": "^3.1.1"
   },
   "dependencies": {
     "@types/crypto-js": "^3.1.43",
     "@types/ipfs": "git+https://github.com/zabirauf/ipfs-types.git",
-    "@types/node": "^10.11.2",
     "@types/orbit-db": "git+https://github.com/lukas2005/orbit-db-types.git",
     "crypto-js": "^3.1.9-1",
     "ipfs": "^0.32.2",
     "orbit-db": "^0.19.9",
-    "sha.js": "^2.4.11",
+    "rimraf": "^2.6.2",
     "uuid": "^3.3.2"
   }
 }

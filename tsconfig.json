@@ -5,9 +5,9 @@
       "declaration": true,
       "outDir": "./dist",
       "esModuleInterop": true,
-      "types": ["assert"]
+      "allowSyntheticDefaultImports": true
     },
     "include": [
-      "src/**/*", "test/AnchorAPI.test.ts"
+      "src/**/*"
     ]
   }

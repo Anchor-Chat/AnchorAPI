@@ -13,14 +13,14 @@ export class AnchorAPI {
 
     private servers: Server[];
 
-    constructor(o: {}, callback?: (anchorApi: AnchorAPI) => void) {
+    constructor(o: any, callback?: (anchorApi: AnchorAPI) => void) {
         Object.assign(this, o);
 
         if (typeof(this.ipfs) === "undefined") {
 
         }
 
-        this.orbitdb = new OrbitDB(this.ipfs);
+        this.orbitdb = this.orbitdb || new OrbitDB(this.ipfs);
 
         this.orbitdb.kvstore(this.userToken).then(db => {
             db.load().then(async () => {

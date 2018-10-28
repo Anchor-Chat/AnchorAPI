@@ -7,7 +7,7 @@ export class User {
     
     api: AnchorAPI;
 
-    db: KeyValueStore<string, any>
+    db: KeyValueStore<any>
 
     name: string;
     login: string;
@@ -17,7 +17,7 @@ export class User {
         return this.api.thisUser === this;
     }
 
-    private async _init(api: AnchorAPI, userDb: KeyValueStore<string, any>) {
+    private async _init(api: AnchorAPI, userDb: KeyValueStore<any>) {
         this.db = userDb;
         this.api = api;
 
@@ -29,7 +29,7 @@ export class User {
         });
     }
 
-    static async create(api: AnchorAPI, userDb: KeyValueStore<string, any>): Promise<User> {
+    static async create(api: AnchorAPI, userDb: KeyValueStore<any>): Promise<User> {
         let o = new User();
         await o._init(api, userDb);
         return o;

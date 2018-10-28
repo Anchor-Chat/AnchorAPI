@@ -30,7 +30,7 @@ export class AnchorAPI extends EventEmitter {
         this.users = new Map();
     }
 
-    static async create(ipfs: IPFS, orbitdb: OrbitDB, db: KeyValueStore<string, any>, userLog: EventStore<UserLogEntry>, login: string): Promise<AnchorAPI> {
+    static async create(ipfs: IPFS, orbitdb: OrbitDB, db: KeyValueStore<any>, userLog: EventStore<UserLogEntry>, login: string): Promise<AnchorAPI> {
         let api = new AnchorAPI(ipfs, orbitdb, userLog, login);
         api.thisUser = await api._getUserData(login, db);
         
@@ -182,17 +182,17 @@ export class AnchorAPI extends EventEmitter {
             .filter(e => e.login === login)
     }
 
-    private async _dbToUser(userDb: KeyValueStore<string, any>): Promise<User> {
+    private async _dbToUser(userDb: KeyValueStore<any>): Promise<User> {
         return await User.create(this, userDb);
     }
 
-    async _getUserData(login: string, db?: KeyValueStore<string, any>,): Promise<User> {
+    async _getUserData(login: string, db?: KeyValueStore<any>,): Promise<User> {
         if (this.users.has(login)) return this.users.get(login);
 
         let userLogEntry = this._queryUserLog(login)[0] || undefined;
 
         if (userLogEntry) {
-            let userDB: KeyValueStore<string, any> = db == undefined ? await this.orbitdb.kvstore(userLogEntry.address) : db;
+            let userDB: KeyValueStore<any> = db == undefined ? await this.orbitdb.kvstore(userLogEntry.address) : db;
             let user = await this._dbToUser(userDB);
             user.login = login;
 

@@ -5,7 +5,7 @@ import sha256 from "crypto-js/sha256";
 import Base64 from "crypto-js/enc-base64";
 import AES from "crypto-js/aes";
 import CryptoJS from "crypto-js";
-import IPFS = require("ipfs");
+import * as IPFS from "ipfs";
 import OrbitDB from "orbit-db"
 import Keystore from "orbit-db-keystore";
 import { EventStore } from "orbit-db-eventstore";
@@ -15,8 +15,6 @@ import uuid from "uuid/v4"
 
 /// <reference path="../node_modules/@types/node/index.d.ts" />
 import path from "path";
-import os from "os";
-import { FeedStore } from "orbit-db-feedstore";
 
 const USER_LOG_NAME = "Anchor-Chat/userLog";
 const USER_LOG_ADDRESS = "/orbitdb/QmURvEErXCPnDB9ERPHRNHsChp44TGNNKnv8euRqa5n7Vz/"+USER_LOG_NAME;
@@ -60,7 +58,7 @@ export class AnchorAPIBuilder {
     private _setDefaults() {
         return new Promise((resolve, reject) => {
             if (this.ipfs === null) {
-                this.setIPFS(new IPFS(Object.assign({
+                this.setIPFS(new IPFS.default(Object.assign({
                     EXPERIMENTAL: {
                         pubsub: true
                     },
@@ -90,7 +88,7 @@ export class AnchorAPIBuilder {
 
         let orbitdb = new OrbitDB(this.ipfs, path.join(this.directory, ".orbitdb"));
 
-        let userLog = await orbitdb.log(USER_LOG_ADDRESS, { write: ["*"] });
+        let userLog = await orbitdb.log<UserLogEntry>(USER_LOG_ADDRESS, { write: ["*"] });
         await userLog.load();
 
         let u = userLog
@@ -128,7 +126,7 @@ export class AnchorAPIBuilder {
 
         console.log("log");
 
-        userLog = userLog || await orbitdb.log(USER_LOG_ADDRESS, { write: ["*"] });
+        userLog = userLog || await orbitdb.log<UserLogEntry>(USER_LOG_ADDRESS, { write: ["*"] });
         await userLog.load();
 
         let userLogEntry = userLog
@@ -140,7 +138,7 @@ export class AnchorAPIBuilder {
         console.log("entry");
 
         if (userLogEntry) {
-            let userDB = await orbitdb.kvstore(userLogEntry.address);
+            let userDB = await orbitdb.kvstore<any>(userLogEntry.address);
             await userDB.load();
 
             let key = userDB.get("key");

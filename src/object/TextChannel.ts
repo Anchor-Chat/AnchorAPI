@@ -19,16 +19,16 @@ export class TextChannel extends EventEmitter {
     name: string;
     users: User[] = [];
 
-    db: KeyValueStore<string, any>;
+    db: KeyValueStore<any>;
 
     messages: Message[] = [];
 
-    static async create(api: AnchorAPI, db: string | KeyValueStore<string, any>, id: string) {
+    static async create(api: AnchorAPI, db: string | KeyValueStore<any>, id: string) {
         let channel = new TextChannel();
 
         channel.id = id;
         channel.api = api;
-        channel.db = typeof db === "string" ? await api.orbitdb.kvstore(db) :  typeof (<KeyValueStore<string, any>>db).set === "function" ? db : undefined;
+        channel.db = typeof db === "string" ? await api.orbitdb.kvstore(db) :  typeof (<KeyValueStore<any>>db).set === "function" ? db : undefined;
 
         if (channel.db === undefined) {
             throw new AnchorError("Error: Invalid db pointer! Must be a string or a KeyValueStore!");

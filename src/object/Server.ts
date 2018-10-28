@@ -4,10 +4,10 @@ import AnchorAPI from "../AnchorAPI";
 export default class Server {
     name: string;
 
-    db: KeyValueStore<string, any>;
+    db: KeyValueStore<any>;
 
     constructor(api: AnchorAPI, address: string, callback: (anchorApi: Server) => void) {
-        api.orbitdb.kvstore(address).then(async (db) => {
+        api.orbitdb.kvstore<any>(address).then(async (db) => {
             this.db = db;
 
             await db.load();

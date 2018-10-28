@@ -140,4 +140,6 @@ $RECYCLE.BIN/
 # Custom
 /dist
 /preview
-/orbitdb
+/.orbitdb
+/.jsipfs
+/.anchor*

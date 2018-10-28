@@ -2,10 +2,11 @@
   "name": "anchor-api",
   "version": "1.0.0",
   "description": "A package that allows you to communicate with the Anchor Chat",
-  "main": "dist/index.js",
-  "types": "dist/inde.d.ts",
+  "main": "dist/node/index.js",
+  "types": "dist/node/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "bundle": "browserify src/index.ts -p [ tsify ] -d | exorcist dist/browser/index.js.map > dist/browser/index.js && uglifyjs dist/browser/index.js --source-map \"filename='dist/browser/index.map.js',url='index.min.js.map'\" -m -c -o dist/browser/index.min.js",
     "test": "npm run build && mocha --timeout 200000",
     "prepare": "npm run build && require-self"
   },
@@ -25,18 +26,23 @@
   },
   "homepage": "https://github.com/Anchor-Chat/AnchorAPI#readme",
   "devDependencies": {
-    "@types/node": "^10.11.2",
+    "@types/node": "^10.11.7",
+    "browserify": "^16.2.3",
+    "exorcist": "^1.0.1",
+    "mkdirp": "^0.5.1",
     "mocha": "^5.2.0",
     "require-self": "^0.2.1",
     "ts-node": "^7.0.1",
-    "typescript": "^3.1.1"
+    "tsify": "^4.0.0",
+    "typescript": "^3.1.3",
+    "uglify-es": "^3.3.9"
   },
   "dependencies": {
     "@types/crypto-js": "^3.1.43",
     "@types/ipfs": "git+https://github.com/zabirauf/ipfs-types.git",
     "@types/orbit-db": "git+https://github.com/lukas2005/orbit-db-types.git",
     "crypto-js": "^3.1.9-1",
-    "ipfs": "^0.32.2",
+    "ipfs": "^0.32.3",
     "orbit-db": "^0.19.9",
     "rimraf": "^2.6.2",
     "uuid": "^3.3.2"

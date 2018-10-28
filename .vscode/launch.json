@@ -7,23 +7,31 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch current file w mocha",
-            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-            "env": {
-                "TS_NODE_PROJECT": "tsconfig.json"
-            },
+            "name": "Launch via NPM",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "test"
+            ],
+            "port": 9229
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha Tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
-                "--ui",
+                "-u",
                 "tdd",
                 "--timeout",
-                "4000",
+                "999999",
                 "--colors",
-                "--require",
-                "ts-node/register",
-                "${relativeFile}"
+                "${workspaceFolder}/test"
             ],
-            "cwd": "${workspaceRoot}",
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
+            "skipFiles": [
+                "<node_internals>/**/*.js",
+                "node_modules/async/**/*.js"
+            ]
         }
     ]
 }

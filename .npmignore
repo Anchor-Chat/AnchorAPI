@@ -1,6 +1,9 @@
 tsconfig.json
 src
 .gitignore
-orbitdb
+.orbitdb
+.jsipfs
 scripts
-tests
+test
+dist/browser
+.anchor*

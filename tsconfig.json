@@ -3,9 +3,10 @@
       "module": "commonjs",
       "target": "es6",
       "declaration": true,
-      "outDir": "./dist",
+      "outDir": "./dist/node",
       "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true
+      "allowSyntheticDefaultImports": true,
+      //"noImplicitAny": true
     },
     "include": [
       "src/**/*"

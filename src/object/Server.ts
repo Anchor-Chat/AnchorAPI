@@ -1,13 +1,12 @@
 import { KeyValueStore } from "orbit-db-kvstore";
-import AnchorAPI from "./AnchorAPI";
+import AnchorAPI from "../AnchorAPI";
 
 export default class Server {
     name: string;
 
-    db: KeyValueStore;
+    db: KeyValueStore<string, any>;
 
     constructor(api: AnchorAPI, address: string, callback: (anchorApi: Server) => void) {
-        console.log("y");
         api.orbitdb.kvstore(address).then(async (db) => {
             this.db = db;
 
@@ -19,7 +18,10 @@ export default class Server {
 
             callback(this);
         });
-
-      
     }
+
+    async destroy() {
+        await this.db.close();
+    }
+
 }

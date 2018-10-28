@@ -1,5 +1,5 @@
 import uuidv4 from "uuid/v4"
-import Server from "./Server";
+import Server from "./object/Server";
 import { AnchorAPI } from "./AnchorAPI";
 
 export class ServerBuilder {
@@ -25,10 +25,10 @@ export class ServerBuilder {
 
         return new Promise((resolve, reject) => {
             new Server(this.api, uuid, s => {
-                let srvrs: string[] = this.api.db.get("servers");
+                let srvrs: string[] = this.api.thisUser.db.get("servers");
                 
                 srvrs.push(s.db.address.toString());
-                this.api.db.set("servers", srvrs);
+                this.api.thisUser.db.set("servers", srvrs);
     
                 resolve(s);
             });

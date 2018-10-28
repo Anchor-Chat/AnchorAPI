@@ -5,7 +5,7 @@ const {
 let api;
 
 waitForUserInput("Create account or login? (C/l)").then(async (i) => {
-    switch (i.toLowercase()) {
+    switch (i.toLowerCase()) {
         case("c"):
 
             let login = await waitForUserInput("Login: ");
@@ -17,8 +17,8 @@ waitForUserInput("Create account or login? (C/l)").then(async (i) => {
                 .createAccount()
             break;
         case("l"):
-            let login = await waitForUserInput("Login: ");
-            let pass = await waitForUserInput("Password: ");
+            login = await waitForUserInput("Login: ");
+            pass = await waitForUserInput("Password: ");
 
             api = await new AnchorAPIBuilder()
                 .setDirectory(".anchor1")

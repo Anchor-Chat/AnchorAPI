@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/Anchor-Chat/AnchorAPI#readme",
   "devDependencies": {
-    "@types/node": "^10.11.7",
+    "@types/node": "^10.12.0",
     "browserify": "^16.2.3",
     "exorcist": "^1.0.1",
     "mkdirp": "^0.5.1",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@types/crypto-js": "^3.1.43",
-    "@types/ipfs": "git+https://github.com/zabirauf/ipfs-types.git",
+    "@types/ipfs": "git+https://github.com/lukas2005/types-ipfs.git",
     "@types/orbit-db": "git+https://github.com/lukas2005/orbit-db-types.git",
     "crypto-js": "^3.1.9-1",
     "ipfs": "^0.32.3",

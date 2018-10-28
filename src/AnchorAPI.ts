@@ -34,7 +34,6 @@ export class AnchorAPI extends EventEmitter {
         let api = new AnchorAPI(ipfs, orbitdb, userLog, login);
         api.thisUser = await api._getUserData(login, db);
         
-        console.log(api.thisUser.login);
         ipfs.pubsub.subscribe("Anchor-Chat/ping/"+api.thisUser.login, (msg) => {
             msg = msg.data.toString("utf8");
 
@@ -174,7 +173,6 @@ export class AnchorAPI extends EventEmitter {
     }
 
     private _queryUserLog(login: string): UserLogEntry[] {
-        console.log(this.userLog.address);
         return this.userLog
             .iterator()
             .collect()

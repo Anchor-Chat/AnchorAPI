@@ -100,13 +100,20 @@ describe("AnchorAPI", () => {
     it("Logs into a account", async () => {
         //rimraf.sync("./.jsipfs");
         //rimraf.sync(keyPath);
-
-        try {
             const anchor = await new AnchorAPIBuilder()
                 .setDirectory(".anchor1")
                 .setIPFSConfig(config1)
                 .setLoginAndPassword(userName1, password)
                 .login();
+
+                anchor.userLog.events.once("replicated", async () => {
+                    console.log("replicated");
+                    let textChannel1 = await api1.openPrivateChannelWith(userName2);
+    
+                    messages.forEach(async (e) => {
+                        await textChannel1.sendMessage(e);
+                    });
+                });
 
             assert.notEqual(anchor.ipfs, null);
             assert.notEqual(anchor.orbitdb, null);
@@ -116,30 +123,33 @@ describe("AnchorAPI", () => {
             assert.notEqual(anchor.thisUser.db, null);
 
             api1 = anchor;
-            console.log(api2.ipfs.isOnline());
-
-            let textChannel = await anchor.openPrivateChannelWith(userName2);
-
-            messages.forEach(async (e) => {
-                await textChannel.sendMessage(e);
-            });
-        } catch (err) {
-            done(err);
-            console.error(err);
-            process.exit(1);
-        }
     });
 
-    it("Chatty", async () => {
-        let textChannel = await api2.openPrivateChannelWith(userName1);
-        
-        let msgs = await textChannel.getMessageHistory();
-        
-        await api1.close();
-        await api2.close();
+    it("Chatty", () => {
+        return new Promise(async (resolve, reject) => {
+            //console.log(await api1.ipfs.swarm.peers());
 
-        assert.equal(msgs, messages);
+            // api1.userLog.events.once("replicated", async () => {
+            //     console.log("replicated");
+            //     let textChannel1 = await api1.openPrivateChannelWith(userName2);
 
-        return;
+            //     messages.forEach(async (e) => {
+            //         await textChannel1.sendMessage(e);
+            //     });
+            // });
+
+            api2.on("privateTextChannelOpen", async (login) => {
+                let textChannel2 = await api2.openPrivateChannelWith(login);
+            
+                let msgs = await textChannel2.getMessageHistory();
+                
+                await api1.close();
+                await api2.close();
+        
+                assert.equal(msgs, messages);
+
+                resolve();
+            });
+        });
     });
 })

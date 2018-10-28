@@ -66,13 +66,10 @@ export class AnchorAPIBuilder {
                 }, this.ipfsOpts)));
             }
         
-            //console.log((<any>this.ipfs)._options.Addresses);
-
             this.ipfs.on("error", (err) => {
                 return reject(err);
             });
     
-
             if (!this.ipfs.isOnline()) {
                 this.ipfs.on("ready", () => {
                     resolve();
@@ -124,8 +121,6 @@ export class AnchorAPIBuilder {
 
         orbitdb = orbitdb || new OrbitDB(this.ipfs, path.join(this.directory, ".orbitdb"));
 
-        console.log("log");
-
         userLog = userLog || await orbitdb.log<UserLogEntry>(USER_LOG_ADDRESS, { write: ["*"] });
         await userLog.load();
 
@@ -134,8 +129,6 @@ export class AnchorAPIBuilder {
             .collect()
             .map(e => e.payload.value)
             .filter(e => e.login === this._login)[0] || null;
-
-        console.log("entry");
 
         if (userLogEntry) {
             let userDB = await orbitdb.kvstore<any>(userLogEntry.address);

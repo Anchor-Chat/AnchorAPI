@@ -56,9 +56,11 @@ export class TextChannel extends EventEmitter {
     }
 
     async sendMessage(text: string) {
-        let msgs = await this.getMessageHistory({ limit: 1 , reverse: true });
-
         let msg = new MessageEntry(this.api.thisUser.toEntry(), text);
+
+        let msgs = this.db.get("messages");
+        msgs.push(msg);
+        await this.db.set("messages", msgs);
     }
 
     async close() {
@@ -73,8 +75,11 @@ export class TextChannel extends EventEmitter {
 
         msgData = msgData.slice(this.messages.length-1);
 
+        this.messages = [];
         msgData.forEach(async (data) => {
             let msg = new Message(await this.api._getUserData(data.author.login), data.text);
+
+            this.messages.push(msg);
 
             this.emit("message", msg);
         })

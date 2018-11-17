@@ -51,6 +51,8 @@ export class AnchorAPI extends EventEmitter {
             api.emit("privateTextChannelOpen", msg.login);
         });
 
+        api.userLog.events.once("replicated", () => api.emit("ready"));
+
         return api;
     }
 
@@ -96,7 +98,7 @@ export class AnchorAPI extends EventEmitter {
     }
 
     getUserByLogin(login: string): User {
-        if (this.users.get(login)) {
+        if (this.users.has(login)) {
             return this.users.get(login);
         }
     }
@@ -105,47 +107,65 @@ export class AnchorAPI extends EventEmitter {
         return new ServerBuilder(this);
     }
 
-    async openPrivateChannelWith(login: string): Promise<TextChannel> {
-        let textChannels = this.thisUser.db.get("privateTextChannels") || {};
+    openPrivateChannelWith(login: string): Promise<TextChannel> {
+        return new Promise(async (resolve, reject) => {
+            let textChannels = this.thisUser.db.get("privateTextChannels") || {};
 
-        let db;
-        let key;
-        let key1 = this.thisUser.login+":"+login;
-        let key2 = login+":"+this.thisUser.login;
-
-        if (textChannels[key1]) {
-            db = textChannels[key1].toString();
-            key = key1;
-        } else if (textChannels[key2]) {
-            db = textChannels[key2].toString();
-            key = key2;
-        } else {
-            if (await this.ping(login)) {
-                key = key1;
-
-                let user = await this._getUserData(login);
-
-                db = await this.orbitdb.kvstore("/Anchor-Chat/textChannel/"+key, {
-                    write: [
-                        this.orbitdb.key.getPublic("hex"),
-                        user.db.get("key").public
-                    ]
-                });
-
-                textChannels[key] = db.address.toString();
-                this.thisUser.db.set("privateTextChannels", textChannels);
-
-                await this.ipfs.pubsub.publish("Anchor-Chat/addPrivateChannel/"+login, Buffer.from(JSON.stringify({
-                    address: db.address.toString(),
-                    key,
-                    login: this.thisUser.login
-                })));
-            } else {
-                throw new AnchorError("To create a new private text channel both users must be online!");
+            let db;
+            let key;
+            let key1 = this.thisUser.login+":"+login;
+            let key2 = login+":"+this.thisUser.login;
+    
+            let c = async () => {
+                return await TextChannel.create(this, db, key);
             }
-        }
 
-        return await TextChannel.create(this, db, key);
+            if (textChannels[key1]) {
+                db = textChannels[key1].toString();
+                key = key1;
+                resolve(await c());
+            } else if (textChannels[key2]) {
+                db = textChannels[key2].toString();
+                key = key2;
+                resolve(await c());
+            } else {
+                if (await this.ping(login)) {
+                    key = key1;
+    
+                    let user = await this._getUserData(login);
+    
+                    let i = 0;
+                    user.db.events.on("replicated", async () => {
+                        if (i==1) {
+                            i++
+                            console.log(user.key);
+                            db = await this.orbitdb.kvstore("/Anchor-Chat/textChannel/"+key, {
+                                write: [
+                                    this.orbitdb.key.getPublic("hex"),
+                                    user.key.public
+                                ]
+                            });
+            
+                            textChannels[key] = db.address.toString();
+                            this.thisUser.db.set("privateTextChannels", textChannels);
+            
+                            await this.ipfs.pubsub.publish("Anchor-Chat/addPrivateChannel/"+login, Buffer.from(JSON.stringify({
+                                address: db.address.toString(),
+                                key,
+                                login: this.thisUser.login
+                            })));
+
+                            resolve(await c());
+                        } else if (i==0) {
+                            i++;
+                        }
+                    });
+    
+                } else {
+                    throw new AnchorError("To create a new private text channel both users must be online!");
+                }
+            }
+        });
     }
 
     async close() {
@@ -174,7 +194,7 @@ export class AnchorAPI extends EventEmitter {
 
     private _queryUserLog(login: string): UserLogEntry[] {
         return this.userLog
-            .iterator()
+            .iterator({ limit: -1 })
             .collect()
             .map(e => e.payload.value)
             .filter(e => e.login === login)
@@ -184,18 +204,19 @@ export class AnchorAPI extends EventEmitter {
         return await User.create(this, userDb);
     }
 
-    async _getUserData(login: string, db?: KeyValueStore<any>,): Promise<User> {
+    async _getUserData(login: string, db?: KeyValueStore<any>): Promise<User> {
         if (this.users.has(login)) return this.users.get(login);
 
         let userLogEntry = this._queryUserLog(login)[0] || undefined;
 
         if (userLogEntry) {
-            let userDB: KeyValueStore<any> = db == undefined ? await this.orbitdb.kvstore(userLogEntry.address) : db;
-            let user = await this._dbToUser(userDB);
+            db = db == undefined ? await this.orbitdb.kvstore(userLogEntry.address) : db;
+            await db.load();
+
+            let user = await this._dbToUser(db);
             user.login = login;
-
+    
             this.users.set(login, user);
-
             return user;
         } else {
             throw new AnchorError("User doesn't exist!");

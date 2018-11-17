@@ -17,7 +17,7 @@ import uuid from "uuid/v4"
 import path from "path";
 
 const USER_LOG_NAME = "Anchor-Chat/userLog";
-const USER_LOG_ADDRESS = "/orbitdb/QmURvEErXCPnDB9ERPHRNHsChp44TGNNKnv8euRqa5n7Vz/"+USER_LOG_NAME;
+const USER_LOG_ADDRESS = "/orbitdb/QmURvEErXCPnDB9ERPHRNHsChp44TGNNKnv8euRqa5n7Vz/" + USER_LOG_NAME;
 
 export class AnchorAPIBuilder {
 
@@ -31,7 +31,7 @@ export class AnchorAPIBuilder {
     constructor() {
         this.setDirectory(process.cwd());
     }
-    
+
     setDirectory(directory: string): AnchorAPIBuilder {
         this.directory = directory;
         return this;
@@ -43,7 +43,7 @@ export class AnchorAPIBuilder {
     }
 
     setLoginAndPassword(login: string, password: string): AnchorAPIBuilder {
-        this.cypher = Base64.stringify(sha256(login +":"+ password));
+        this.cypher = Base64.stringify(sha256(login + ":" + password));
         this._login = login;
 
         return this;
@@ -65,11 +65,11 @@ export class AnchorAPIBuilder {
                     repo: path.join(this.directory, ".jsipfs")
                 }, this.ipfsOpts)));
             }
-        
+
             this.ipfs.on("error", (err) => {
                 return reject(err);
             });
-    
+
             if (!this.ipfs.isOnline()) {
                 this.ipfs.on("ready", () => {
                     resolve();
@@ -85,11 +85,13 @@ export class AnchorAPIBuilder {
 
         let orbitdb = new OrbitDB(this.ipfs, path.join(this.directory, ".orbitdb"));
 
-        let userLog = await orbitdb.log<UserLogEntry>(USER_LOG_ADDRESS, { write: ["*"] });
+        let userLog = await orbitdb.log<UserLogEntry>(USER_LOG_NAME, { write: ["*"] });
         await userLog.load();
 
+        console.log(userLog.address);
+
         let u = userLog
-            .iterator()
+            .iterator({ limit: -1 })
             .collect()
             .map(e => e.payload.value)
             .filter(e => e.login === this._login)[0] || null;
@@ -98,7 +100,7 @@ export class AnchorAPIBuilder {
             return await this.login(orbitdb, userLog);
         }
 
-        let userDB = await orbitdb.kvstore("Anchor-Chat/"+this._login);
+        let userDB = await orbitdb.kvstore("Anchor-Chat/" + this._login);
         await userDB.load();
 
         let key = {
@@ -116,60 +118,64 @@ export class AnchorAPIBuilder {
         return await AnchorAPI.create(this.ipfs, orbitdb, userDB, userLog, this._login);
     }
 
-    async login(orbitdb?: OrbitDB, userLog?: EventStore<UserLogEntry>): Promise<AnchorAPI> {
-        await this._setDefaults();
+    login(orbitdb?: OrbitDB, userLog?: EventStore<UserLogEntry>): Promise<AnchorAPI> {
+        return new Promise<AnchorAPI>(async (resolve, reject) => {
+            await this._setDefaults();
 
-        orbitdb = orbitdb || new OrbitDB(this.ipfs, path.join(this.directory, ".orbitdb"));
+            orbitdb = orbitdb || new OrbitDB(this.ipfs, path.join(this.directory, ".orbitdb"));
 
-        userLog = userLog || await orbitdb.log<UserLogEntry>(USER_LOG_ADDRESS, { write: ["*"] });
-        await userLog.load();
+            userLog = userLog || await orbitdb.log<UserLogEntry>(USER_LOG_ADDRESS, { write: ["*"] });
+            await userLog.load();
 
-        let userLogEntry = userLog
-            .iterator()
-            .collect()
-            .map(e => e.payload.value)
-            .filter(e => e.login === this._login)[0] || null;
+            userLog.events.once("replicated", async () => {
+                let userLogEntry = userLog
+                    .iterator({ limit: -1 })
+                    .collect()
+                    .map(e => e.payload.value)
+                    .filter(e => e.login === this._login)[0] || null;
 
-        if (userLogEntry) {
-            let userDB = await orbitdb.kvstore<any>(userLogEntry.address);
-            await userDB.load();
-
-            let key = userDB.get("key");
-
-            if (!orbitdb.key.getPublic('hex').toString().match(key.public)) {
-                key.private = AES.decrypt(key.private, this.cypher).toString(CryptoJS.enc.Utf8);
-
-                if (key.private.length > 0) {
-                        
-                    let dir = orbitdb.directory;
-                    let keystoreDir = path.join(dir/*, "/keystore"*/);
-                    await orbitdb.stop();
-
-                    rimraf.sync(keystoreDir);
-
-                    let keystore = Keystore.create(keystoreDir);
-                    keystore.importPublicKey(key.public);
-                    keystore.importPrivateKey(key.private);
-
-                    orbitdb = new OrbitDB(this.ipfs, dir, {
-                        keystore
-                    });
-
-                    userDB = await orbitdb.kvstore(userLogEntry.address);
+                if (userLogEntry) {
+                    let userDB = await orbitdb.kvstore<any>(userLogEntry.address);
                     await userDB.load();
 
+                    let key = userDB.get("key");
+
+                    if (!orbitdb.key.getPublic('hex').toString().match(key.public)) {
+                        key.private = AES.decrypt(key.private, this.cypher).toString(CryptoJS.enc.Utf8);
+
+                        if (key.private.length > 0) {
+
+                            let dir = orbitdb.directory;
+                            let keystoreDir = path.join(dir/*, "/keystore"*/);
+                            await orbitdb.stop();
+
+                            rimraf.sync(keystoreDir);
+
+                            let keystore = Keystore.create(keystoreDir);
+                            keystore.importPublicKey(key.public);
+                            keystore.importPrivateKey(key.private);
+
+                            orbitdb = new OrbitDB(this.ipfs, dir, {
+                                keystore
+                            });
+
+                            userDB = await orbitdb.kvstore(userLogEntry.address);
+                            await userDB.load();
+
+                        } else {
+                            return reject(new AnchorAuthError("The password is incorrect!"));
+                        }
+                    }
+
+                    return resolve(await AnchorAPI.create(this.ipfs, orbitdb, userDB, userLog, this._login));
+
                 } else {
-                    throw new AnchorAuthError("The password is incorrect!");
+                    return reject(new AnchorAuthError("A user with this login doesn't exist!"));
                 }
-            }
-
-            return await AnchorAPI.create(this.ipfs, orbitdb, userDB, userLog, this._login);
-
-        } else {
-            throw new AnchorAuthError("A user with this login doesn't exist!");
-        }
+            });
+        });
     }
-    
+
 }
 
 export default AnchorAPIBuilder;

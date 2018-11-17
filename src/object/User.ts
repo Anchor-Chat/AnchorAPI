@@ -11,6 +11,7 @@ export class User {
 
     name: string;
     login: string;
+    key: { public: string, private: string }
     servers: Server[];
 
     isLocalUser(): boolean {
@@ -22,10 +23,13 @@ export class User {
         this.api = api;
 
         this.name = userDb.get("name");
-        this.servers = await api._getServerData(this.db.get("servers"));
-        userDb.events.on("replicated", async () => {
-            this.name = userDb.get("name");
-            this.servers = await api._getServerData(this.db.get("servers"));
+        this.servers = await api._getServerData(this.db.get("servers") || []);
+        this.db.events.prependListener("replicated", () => {
+            this.name = this.db.get("name");
+            api._getServerData(this.db.get("servers") || []).then((servers) => {
+                this.servers = servers;
+            });
+            this.key = this.db.get("key");
         });
     }
 

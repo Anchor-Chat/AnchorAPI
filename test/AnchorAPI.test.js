@@ -83,13 +83,14 @@ describe("AnchorAPI", () => {
                     assert.notEqual(api.thisUser.db, null);
 
                     if (api.thisUser.login === userName1) {
-                        await api.close();
+                        //await api.close();
+                        api1 = api;
                     } else {
                         api2 = api;
                     }
                 });
             } catch (err) {
-                done(err);
+                throw err;
                 //console.error(err);
                 //process.exit(1);
             }
@@ -97,33 +98,25 @@ describe("AnchorAPI", () => {
 
     });
 
-    it("Logs into a account", async () => {
-        //rimraf.sync("./.jsipfs");
-        //rimraf.sync(keyPath);
-            const anchor = await new AnchorAPIBuilder()
-                .setDirectory(".anchor1")
-                .setIPFSConfig(config1)
-                .setLoginAndPassword(userName1, password)
-                .login();
+    // it("Logs into a account", async (done) => {
+    //     //rimraf.sync("./.jsipfs");
+    //     //rimraf.sync(keyPath);
+    //         // const anchor = await new AnchorAPIBuilder()
+    //         //     .setDirectory(".anchor1")
+    //         //     .setIPFSConfig(config1)
+    //         //     .setLoginAndPassword(userName1, password)
+    //         //     .login();
 
-                anchor.userLog.events.once("replicated", async () => {
-                    console.log("replicated");
-                    let textChannel1 = await api1.openPrivateChannelWith(userName2);
-    
-                    messages.forEach(async (e) => {
-                        await textChannel1.sendMessage(e);
-                    });
-                });
 
-            assert.notEqual(anchor.ipfs, null);
-            assert.notEqual(anchor.orbitdb, null);
-            assert.notEqual(anchor.userLog, null);
-            assert.ok(anchor.users.has(anchor.thisUser.login));
-            assert.equal(anchor.thisUser.api, anchor);
-            assert.notEqual(anchor.thisUser.db, null);
+    //         // assert.notEqual(anchor.ipfs, null);
+    //         // assert.notEqual(anchor.orbitdb, null);
+    //         // assert.notEqual(anchor.userLog, null);
+    //         // assert.ok(anchor.users.has(anchor.thisUser.login));
+    //         // assert.equal(anchor.thisUser.api, anchor);
+    //         // assert.notEqual(anchor.thisUser.db, null);
 
-            api1 = anchor;
-    });
+    //         //api1 = anchor;
+    // });
 
     it("Chatty", () => {
         return new Promise(async (resolve, reject) => {
@@ -138,6 +131,18 @@ describe("AnchorAPI", () => {
             //     });
             // });
 
+            api1.on("ready", async () => {
+
+                //console.log(api1.userLog.iterator({ limit: -1 }).collect().map(e=> e.payload.value));
+
+                let textChannel1 = await api1.openPrivateChannelWith(userName2);
+
+                messages.forEach(async (e) => {
+                    await textChannel1.sendMessage(e);
+                });
+
+            });
+
             api2.on("privateTextChannelOpen", async (login) => {
                 let textChannel2 = await api2.openPrivateChannelWith(login);
             
@@ -146,7 +151,7 @@ describe("AnchorAPI", () => {
                 await api1.close();
                 await api2.close();
         
-                assert.equal(msgs, messages);
+                assert.equal(msgs.map(e => e.text), messages);
 
                 resolve();
             });

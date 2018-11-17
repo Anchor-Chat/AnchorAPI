@@ -29,6 +29,7 @@ export class TextChannel extends EventEmitter {
         channel.id = id;
         channel.api = api;
         channel.db = typeof db === "string" ? await api.orbitdb.kvstore(db) :  typeof (<KeyValueStore<any>>db).set === "function" ? db : undefined;
+        await channel.db.load();
 
         if (channel.db === undefined) {
             throw new AnchorError("Error: Invalid db pointer! Must be a string or a KeyValueStore!");
@@ -42,23 +43,24 @@ export class TextChannel extends EventEmitter {
         return channel;
     }
 
-    getMessageHistory(options?: { limit: number, reverse: boolean }) {
+    getMessageHistory(options?: { limit: number, reverse: boolean }): Message[] {
+        let messages = this.messages;
         if (options !== undefined) {
             if (options.limit > 0) {
-                this.messages = this.messages.slice(0, options.limit);
+                messages = messages.slice(0, options.limit);
             }
             if (options.reverse) {
-                this.messages = this.messages.reverse();
+                messages = messages.reverse();
             }
         }
 
-        return this.messages;
+        return messages;
     }
 
     async sendMessage(text: string) {
         let msg = new MessageEntry(this.api.thisUser.toEntry(), text);
 
-        let msgs = this.db.get("messages");
+        let msgs = this.db.get("messages") || [];
         msgs.push(msg);
         await this.db.set("messages", msgs);
     }

@@ -1,6 +1,6 @@
 {
   "name": "@anchor-chat/anchor-api",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A package that allows you to communicate with the Anchor Chat",
   "main": "dist/node/index.js",
   "types": "dist/node/index.d.ts",

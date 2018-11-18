@@ -8,3 +8,5 @@ test
 dist/browser
 .anchor*
 scripts
+dist/docs
+dist/browser

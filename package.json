@@ -7,7 +7,7 @@
   "scripts": {
     "dist": "npm run build && npm run bundle && npm run docs",
     "build": "mkdir -p dist/node && tsc",
-    "bundle": "mkdir -p dist/browser && browserify src/index.ts -p [ tsify ] -d | exorcist dist/browser/$npm_package_name.js.map > dist/browser/$npm_package_name.js && uglifyjs dist/browser/$npm_package_name.js --source-map \"filename='dist/browser/$npm_package_name.map.js',url='$npm_package_name.min.js.map'\" -m -c -o dist/browser/$npm_package_name.min.js",
+    "bundle": "mkdir -p dist/browser && browserify src/index.ts -p [ tsify ] -d | exorcist dist/browser/anchor-api.js.map > dist/browser/anchor-api.js && uglifyjs dist/browser/anchor-api.js --source-map \"filename='dist/browser/anchor-api.map.js',url='anchor-api.min.js.map'\" -m -c -o dist/browser/anchor-api.min.js",
     "docs": "mkdir -p dist/docs && typedoc --out dist/docs --mode modules ./src/",
     "test": "npm run build && mocha --timeout 200000",
     "prepare": "require-self"

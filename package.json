@@ -1,5 +1,5 @@
 {
-  "name": "anchor-api",
+  "name": "@anchor-chat/anchor-api",
   "version": "1.0.0",
   "description": "A package that allows you to communicate with the Anchor Chat",
   "main": "dist/node/index.js",

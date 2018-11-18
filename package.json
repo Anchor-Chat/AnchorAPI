@@ -5,10 +5,10 @@
   "main": "dist/node/index.js",
   "types": "dist/node/index.d.ts",
   "scripts": {
-    "dist": "npm run build && npm run bundle && npm run docs",
-    "build": "tsc",
-    "bundle": "browserify src/index.ts -p [ tsify ] -d | exorcist dist/browser/$npm_package_name.js.map > dist/browser/$npm_package_name.js && uglifyjs dist/browser/$npm_package_name.js --source-map \"filename='dist/browser/$npm_package_name.map.js',url='$npm_package_name.min.js.map'\" -m -c -o dist/browser/$npm_package_name.min.js",
-    "docs": "typedoc --out dist/docs --mode modules ./src/",
+    "dist": "mkdir dist && npm run build && npm run bundle && npm run docs",
+    "build": "mkdir dist/node && tsc",
+    "bundle": "mkdir dist/browser && browserify src/index.ts -p [ tsify ] -d | exorcist dist/browser/$npm_package_name.js.map > dist/browser/$npm_package_name.js && uglifyjs dist/browser/$npm_package_name.js --source-map \"filename='dist/browser/$npm_package_name.map.js',url='$npm_package_name.min.js.map'\" -m -c -o dist/browser/$npm_package_name.min.js",
+    "docs": "mkdir dist/docs && typedoc --out dist/docs --mode modules ./src/",
     "test": "npm run build && mocha --timeout 200000",
     "prepare": "npm run build && require-self"
   },

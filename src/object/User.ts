@@ -1,19 +1,30 @@
 import { KeyValueStore } from "orbit-db-kvstore";
-import AnchorAPI from "../AnchorAPI";
-import Server from "./Server";
-import UserLogEntry from "./UserLogEntry";
+import { AnchorAPI } from "../AnchorAPI";
+import { Server } from "./Server";
+import { UserLogEntry } from "./UserLogEntry";
 
+/**
+ * A class representing a user
+ */
 export class User {
     
+    /** An [[AnchorAPI]] instance */
     api: AnchorAPI;
 
+    /** This user's db */
     db: KeyValueStore<any>
 
     name: string;
     login: string;
+
+    /** 
+     * This users public and private key.
+     * The private key will be encrypted.
+     */
     key: { public: string, private: string }
     servers: Server[];
 
+    /** Is this the local user? */
     isLocalUser(): boolean {
         return this.api.thisUser === this;
     }
@@ -33,6 +44,10 @@ export class User {
         });
     }
 
+    /**
+     * !!!IMPORTANT!!!
+     * Internal use only 
+     */
     static async create(api: AnchorAPI, userDb: KeyValueStore<any>): Promise<User> {
         let o = new User();
         await o._init(api, userDb);
@@ -44,8 +59,6 @@ export class User {
     }
 
     toJSON() {
-        return this.toEntry();
+        return JSON.stringify(this.toEntry());
     }
 }
-
-export default User;

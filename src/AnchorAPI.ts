@@ -1,28 +1,35 @@
 import OrbitDB from "orbit-db"
 import IPFS = require("ipfs");
-import Server from "./object/Server";
+import { Server } from "./object/Server";
 import { KeyValueStore } from "orbit-db-kvstore";
 import TextChannel from "./object/TextChannel";
-import ServerBuilder from "./ServerBuilder";
-import UserLogEntry from "./object/UserLogEntry";
+import { ServerBuilder } from "./ServerBuilder";
+import { UserLogEntry } from "./object/UserLogEntry";
 import { EventStore } from "orbit-db-eventstore";
 import { User } from "./object/User";
-import AnchorError from "./exceptions/AnchorError";
+import { AnchorError } from "./exceptions/AnchorError";
 import { EventEmitter } from "events";
 
+/**
+ * Main class containing IPFS & OrbiDB instances
+ */
 export class AnchorAPI extends EventEmitter {
 
+    /** IPFS instance */
     ipfs: IPFS;
+    /** OrbitDB instance */
     orbitdb: OrbitDB;
 
+    /** The database containing "links" to all users dbs */
     userLog: EventStore<UserLogEntry>;
 
+    /** This user instance */
     thisUser: User;
 
     private servers: Server[] = [];
     private users: Map<string, User>;
 
-    constructor(ipfs: IPFS, orbitdb: OrbitDB, userLog: EventStore<UserLogEntry>, login: string) {
+    private constructor(ipfs: IPFS, orbitdb: OrbitDB, userLog: EventStore<UserLogEntry>) {
         super();
         this.ipfs = ipfs;
         this.orbitdb = orbitdb;
@@ -30,9 +37,14 @@ export class AnchorAPI extends EventEmitter {
         this.users = new Map();
     }
 
+    /**
+     * Creates a new AnchorAPI instance.
+     * Should never be used.
+     * Look at [[AnchorAPIBuilder]] instead
+     */
     static async create(ipfs: IPFS, orbitdb: OrbitDB, db: KeyValueStore<any>, userLog: EventStore<UserLogEntry>, login: string): Promise<AnchorAPI> {
-        let api = new AnchorAPI(ipfs, orbitdb, userLog, login);
-        api.thisUser = await api._getUserData(login, db);
+        let api = new AnchorAPI(ipfs, orbitdb, userLog);
+        api.thisUser = await api.getUserData(login, db);
         
         ipfs.pubsub.subscribe("Anchor-Chat/ping/"+api.thisUser.login, (msg) => {
             msg = msg.data.toString("utf8");
@@ -56,6 +68,10 @@ export class AnchorAPI extends EventEmitter {
         return api;
     }
 
+    /**
+     * "Pings" another user thru PubSub.
+     * Allows you to find out if they are online.
+     */
     ping(login: string) {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
@@ -77,36 +93,63 @@ export class AnchorAPI extends EventEmitter {
         });
     }
 
+    /**
+     * Gets all the Servers this intance knows about
+     */
     getServers(): Server[] {
         return this.servers;
     }
 
+    /**
+     * Same as [[getServers]] but allows you to filter by name
+     */
     getServersByName(name: string): Server[] {
         return this.getServers().filter(s => {s.name.match(name)});
     }
 
+    /**
+     * Same as [[getServersByName]] but allows you to filter by name, un case-sensitive
+     */
     getServersByNameIgnoreCase(name: string): Server[] {
         return this.getServers().filter(s => {s.name.toLowerCase().match(name.toLowerCase())});
     }
 
+    /**
+     * Gets all users this instance knows about.
+     */
     getUsers(): Map<string, User> {
         return this.users;
     }
 
+
+    /**
+     * Same as [[getUsers]] but allows you to filter by name
+     */
     getUsersByName(name: string): User[] {
         return Array.from(this.getUsers().values()).filter(e => e.name.match(name));
     }
 
+    /**
+     * Same as [[getUsersByName]] but allows you to filter by name, un case-sensitive
+     */
     getUserByLogin(login: string): User {
         if (this.users.has(login)) {
             return this.users.get(login);
         }
     }
 
-    createServerBuilder(): ServerBuilder {
-        return new ServerBuilder(this);
+    /**
+     * Creates a new [[ServerBuilder]]
+     * W.I.P! Do not use.
+     */
+    createServerBuilder() {
+        //return new ServerBuilder(this);
     }
 
+    /**
+     * Opens a private text channel.
+     * To be able to read the messages on the other side you have to call this on both clients.
+     */
     openPrivateChannelWith(login: string): Promise<TextChannel> {
         return new Promise(async (resolve, reject) => {
             let textChannels = this.thisUser.db.get("privateTextChannels") || {};
@@ -132,7 +175,7 @@ export class AnchorAPI extends EventEmitter {
                 if (await this.ping(login)) {
                     key = key1;
     
-                    let user = await this._getUserData(login);
+                    let user = await this.getUserData(login);
     
                     let i = 0;
                     user.db.events.on("replicated", async () => {
@@ -168,11 +211,17 @@ export class AnchorAPI extends EventEmitter {
         });
     }
 
+    /**
+     * Cleanly stops the instance
+     */
     async close() {
         await this.orbitdb.stop();
         await this.ipfs.stop();
     }
 
+    /**
+     * Internal use only
+     */
     _getServerData(serverAddresses: string[]): Promise<Server[]> {
         return new Promise((resolve, reject) => {
             let servers = [] as Server[];
@@ -192,6 +241,9 @@ export class AnchorAPI extends EventEmitter {
         });
     }
 
+    /**
+     * Internal use only
+     */ 
     private _queryUserLog(login: string): UserLogEntry[] {
         return this.userLog
             .iterator({ limit: -1 })
@@ -200,11 +252,18 @@ export class AnchorAPI extends EventEmitter {
             .filter(e => e.login === login)
     }
 
+    /**
+     * !!!IMPORTANT!!! Internal use only
+     */ 
     private async _dbToUser(userDb: KeyValueStore<any>): Promise<User> {
         return await User.create(this, userDb);
     }
 
-    async _getUserData(login: string, db?: KeyValueStore<any>): Promise<User> {
+    /**
+     * Gets a [[User]] instance by login.
+     * Only use the db parameter if you have the user's db already opened.
+     */
+    async getUserData(login: string, db?: KeyValueStore<any>): Promise<User> {
         if (this.users.has(login)) return this.users.get(login);
 
         let userLogEntry = this._queryUserLog(login)[0] || undefined;
@@ -224,4 +283,4 @@ export class AnchorAPI extends EventEmitter {
     }
 }
 
-export default AnchorAPI;
+//export default AnchorAPI;

@@ -1,6 +1,6 @@
 import { AnchorAPI } from "./AnchorAPI";
 import { UserLogEntry } from "./object/UserLogEntry";
-import Server from "./object/Server";
+import { Server } from "./object/Server";
 import sha256 from "crypto-js/sha256";
 import Base64 from "crypto-js/enc-base64";
 import AES from "crypto-js/aes";
@@ -19,9 +19,12 @@ import path from "path";
 const USER_LOG_NAME = "Anchor-Chat/userLog";
 const USER_LOG_ADDRESS = "/orbitdb/QmURvEErXCPnDB9ERPHRNHsChp44TGNNKnv8euRqa5n7Vz/" + USER_LOG_NAME;
 
+/**
+ * Used to create a new [[AnchorAPI]] instance
+ */
 export class AnchorAPIBuilder {
 
-    ipfs: IPFS = null;
+    private ipfs: IPFS = null;
 
     private ipfsOpts;
     private cypher: string;
@@ -32,16 +35,28 @@ export class AnchorAPIBuilder {
         this.setDirectory(process.cwd());
     }
 
+    /**
+     * Sets the directory where all data will be stored (.oribtdb and .jsipfs)
+     */
     setDirectory(directory: string): AnchorAPIBuilder {
         this.directory = directory;
         return this;
     }
 
+    /**
+     * !!!UNRECOMMENDED!!!<br>
+     * Use this if you have your own ipfs instance ready.
+     * Make sure it has EXPERIMENTAL.pubsub = true in the config.
+     * If you only need to change config of the ipfs node see [[setIPFSConfig]]
+     */
     setIPFS(ipfs: IPFS): AnchorAPIBuilder {
         this.ipfs = ipfs;
         return this;
     }
 
+    /**
+     * Sets the login and password.
+     */
     setLoginAndPassword(login: string, password: string): AnchorAPIBuilder {
         this.cypher = Base64.stringify(sha256(login + ":" + password));
         this._login = login;
@@ -49,12 +64,20 @@ export class AnchorAPIBuilder {
         return this;
     }
 
+    /**
+     * Sets the config of a ipfs node that's about to be created.
+     * Unused if [[setIPFS]] is called.
+     */
     setIPFSConfig(opts): AnchorAPIBuilder {
         this.ipfsOpts = opts;
 
         return this;
     }
 
+    /**
+     * !!!IMPORTANT!!!
+     * Internal use only
+     */
     private _setDefaults() {
         return new Promise((resolve, reject) => {
             if (this.ipfs === null) {
@@ -80,7 +103,10 @@ export class AnchorAPIBuilder {
         });
     }
 
-    async createAccount() {
+    /**
+     * Creates a new account with credentials set in [[setLoginAndPassword]]
+     */
+    async createAccount(): Promise<AnchorAPI> {
         await this._setDefaults();
 
         let orbitdb = new OrbitDB(this.ipfs, path.join(this.directory, ".orbitdb"));
@@ -88,7 +114,7 @@ export class AnchorAPIBuilder {
         let userLog = await orbitdb.log<UserLogEntry>(USER_LOG_NAME, { write: ["*"] });
         await userLog.load();
 
-        console.log(userLog.address);
+        //console.log(userLog.address);
 
         let u = userLog
             .iterator({ limit: -1 })
@@ -118,6 +144,9 @@ export class AnchorAPIBuilder {
         return await AnchorAPI.create(this.ipfs, orbitdb, userDB, userLog, this._login);
     }
 
+    /**
+     * Logs in to a account with credentials set in [[setLoginAndPassword]].
+     */
     login(orbitdb?: OrbitDB, userLog?: EventStore<UserLogEntry>): Promise<AnchorAPI> {
         return new Promise<AnchorAPI>(async (resolve, reject) => {
             await this._setDefaults();
@@ -177,5 +206,3 @@ export class AnchorAPIBuilder {
     }
 
 }
-
-export default AnchorAPIBuilder;

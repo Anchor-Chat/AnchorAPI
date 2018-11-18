@@ -23,7 +23,7 @@ let pass;
 waitForUserInput("Create account or login? (C/l)").then(async (i) => {
     let ix = await waitForUserInput("I ");
 
-    port += ix;
+    port += parseInt(ix);
 
     conf.config.Addresses.Swarm.forEach((e,i) => e.match(".*ip4.*") ? conf.config.Addresses.Swarm[i] = e+port : false);
 
@@ -65,7 +65,6 @@ waitForUserInput("Create account or login? (C/l)").then(async (i) => {
 
     let text = await waitForUserInput(">");
     while(text != "exit") {
-
         textChannel.sendMessage(text);
 
         text = await waitForUserInput(">");

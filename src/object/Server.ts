@@ -1,7 +1,7 @@
 import { KeyValueStore } from "orbit-db-kvstore";
-import AnchorAPI from "../AnchorAPI";
+import { AnchorAPI } from "../AnchorAPI";
 
-export default class Server {
+export class Server {
     name: string;
 
     db: KeyValueStore<any>;

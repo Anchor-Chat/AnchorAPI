@@ -1,5 +1,9 @@
-import User from "./User";
+import { User } from "./User";
 
+/**
+ * A mesage object
+ * Contains info about the message
+ */
 export class Message {
 
     author: User;
@@ -10,4 +14,3 @@ export class Message {
         this.text   = text;
     }
 }
-export default Message;

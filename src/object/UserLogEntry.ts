@@ -1,3 +1,6 @@
+/**
+ * Represents a [[User]] entry in the [[AnchorAPI.userLog]] database.
+ */
 export class UserLogEntry {
     login: string;
     address: string;
@@ -7,5 +10,3 @@ export class UserLogEntry {
         this.address = address;
     }
 }
-
-export default UserLogEntry;

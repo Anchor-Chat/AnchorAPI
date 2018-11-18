@@ -1,5 +1,5 @@
 import uuidv4 from "uuid/v4"
-import Server from "./object/Server";
+import { Server } from "./object/Server";
 import { AnchorAPI } from "./AnchorAPI";
 
 export class ServerBuilder {
@@ -35,5 +35,3 @@ export class ServerBuilder {
         });
     }
 }
-
-export default ServerBuilder;

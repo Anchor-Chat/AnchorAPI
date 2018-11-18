@@ -1,26 +1,34 @@
 import { EventEmitter } from "events";
 import { FeedStore } from "orbit-db-feedstore";
-import Message from "./Message";
-import User from "./User";
-import AnchorAPI from "../AnchorAPI";
+import { Message } from "./Message";
+import { User } from "./User";
+import { AnchorAPI } from "../AnchorAPI";
 import { KeyValueStore } from "orbit-db-kvstore";
-import UserLogEntry from "./UserLogEntry";
-import AnchorError from "../exceptions/AnchorError";
+import { UserLogEntry } from "./UserLogEntry";
+import { AnchorError } from "../exceptions/AnchorError";
 
 function fastConcat(arr1: any[], arr2: any[]) {
     Array.prototype.push.apply(arr1, arr2);
 }
 
+/**
+ * A text channel
+ */
 export class TextChannel extends EventEmitter {
 
+    /** An [[AnchorAPI]] instance */
     api: AnchorAPI;
 
+    /** The id of this text channel */
     id: string;
     name: string;
+    /** Users that are a part of this [[TextChannel]] */
     users: User[] = [];
 
+    /** Thius [[TextChannel]]'s db */
     db: KeyValueStore<any>;
 
+    /** [[Message]]s that were sent in this [[TextChannel]] */
     messages: Message[] = [];
 
     static async create(api: AnchorAPI, db: string | KeyValueStore<any>, id: string) {
@@ -43,6 +51,7 @@ export class TextChannel extends EventEmitter {
         return channel;
     }
 
+    /** Allows you to filter thru the messages array */
     getMessageHistory(options?: { limit: number, reverse: boolean }): Message[] {
         let messages = this.messages;
         if (options !== undefined) {
@@ -57,6 +66,7 @@ export class TextChannel extends EventEmitter {
         return messages;
     }
 
+    /** Sends a message */
     async sendMessage(text: string) {
         let msg = new MessageEntry(this.api.thisUser.toEntry(), text);
 
@@ -65,6 +75,11 @@ export class TextChannel extends EventEmitter {
         await this.db.set("messages", msgs);
     }
 
+    /** 
+     * Closes this [[TextChannel]] once you are done with it.
+     * But keep in mind that this text channel will remain 
+     * in the system and text time you open it all the messages will be there
+    */
     async close() {
         await this.db.close();
         return;
@@ -79,7 +94,7 @@ export class TextChannel extends EventEmitter {
 
         this.messages = [];
         msgData.forEach(async (data) => {
-            let msg = new Message(await this.api._getUserData(data.author.login), data.text);
+            let msg = new Message(await this.api.getUserData(data.author.login), data.text);
 
             this.messages.push(msg);
 
@@ -88,6 +103,9 @@ export class TextChannel extends EventEmitter {
     }
 }
 
+/**
+ * A tiny class that reperesents a single entry in this [[TextChannel]]'s db's messages array
+ */
 class MessageEntry {
     author: UserLogEntry;
     text: string;

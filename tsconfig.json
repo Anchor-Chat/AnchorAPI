@@ -5,7 +5,7 @@
       "declaration": true,
       "outDir": "./dist/node",
       "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true,
+      "allowSyntheticDefaultImports": true
       //"noImplicitAny": true
     },
     "include": [

@@ -64,12 +64,29 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<h1 id="anchorapi">AnchorAPI</h1>
+				<h1 id="anchorapi-build-status">AnchorAPI <a href="https://travis-ci.org/Anchor-Chat/AnchorAPI"><img src="https://travis-ci.org/Anchor-Chat/AnchorAPI.svg?branch=master" alt="Build Status"></a></h1>
 				<p>API for the Anchor chat. You use this to create bots and custom clients / integrations</p>
 				<h1 id="w-i-p">W.I.P</h1>
-				<p>Currently this API is in a very early stage and may functionality + API may change and break.</p>
+				<p>Currently this API is in a very early stage and functionality + API may change and break often.</p>
+				<h1 id="installation">Installation</h1>
+				<p><code>npm i @anchor-chat/anchor-api</code></p>
+				<h1 id="browsers">Browsers</h1>
+				<p>if you want to use this in the browser add this to the end of your <code>&lt;body&gt;</code><br>
+					<code>&lt;script src=&quot;https://anchor-chat.github.io/AnchorAPI/dist/anchor-api.min.js&quot;&gt;&lt;/script&gt;</code><br>
+				This includes IPFS and OrbitB</p>
 				<h1 id="docs">Docs</h1>
-				<p>Docs can be found on the Github pages </p>
+				<p>Docs can be found here:
+				<a href="https://anchor-chat.github.io/AnchorAPI/">https://anchor-chat.github.io/AnchorAPI/</a></p>
+				<h1 id="getting-started">Getting started</h1>
+				<p>This is how you start:</p>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> AnchorAPIBuilder()
+    .setDirectory(<span class="hljs-string">".anchor"</span>) <span class="hljs-comment">// Not needed but recommended</span>
+    .setLoginAndPassword(<span class="hljs-string">"login"</span>, <span class="hljs-string">"password"</span>)
+    .createAccount() <span class="hljs-comment">// Or login()</span>
+    .then(<span class="hljs-keyword">async</span> (api) =&gt; {
+        <span class="hljs-comment">// Magic!</span>
+    });</code></pre>
+				<p>Look at the docs for more info</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">

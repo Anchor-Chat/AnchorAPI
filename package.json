@@ -16,6 +16,9 @@
     "type": "git",
     "url": "git+https://github.com/Anchor-Chat/AnchorAPI.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "anchor",
     "chat",

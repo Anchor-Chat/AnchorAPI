@@ -10,7 +10,6 @@ import OrbitDB from "orbit-db"
 import Keystore from "orbit-db-keystore";
 import { EventStore } from "orbit-db-eventstore";
 import { AnchorAuthError } from "./exceptions/AnchorAuthError";
-import rimraf from "rimraf";
 import uuid from "uuid/v4"
 
 /// <reference path="../node_modules/@types/node/index.d.ts" />
@@ -177,8 +176,6 @@ export class AnchorAPIBuilder {
                             let dir = orbitdb.directory;
                             let keystoreDir = path.join(dir/*, "/keystore"*/);
                             await orbitdb.stop();
-
-                            rimraf.sync(keystoreDir);
 
                             let keystore = Keystore.create(keystoreDir);
                             keystore.importPublicKey(key.public);

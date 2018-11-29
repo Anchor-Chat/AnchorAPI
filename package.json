@@ -49,6 +49,7 @@
     "@types/ipfs": "git+https://github.com/lukas2005/types-ipfs.git",
     "@types/orbit-db": "git+https://github.com/lukas2005/orbit-db-types.git",
     "crypto-js": "^3.1.9-1",
+    "eventemitter2": "^5.0.1",
     "ipfs": "^0.32.3",
     "orbit-db": "^0.19.9",
     "uuid": "^3.3.2"

@@ -8,12 +8,12 @@ import { UserLogEntry } from "./object/UserLogEntry";
 import { EventStore } from "orbit-db-eventstore";
 import { User } from "./object/User";
 import { AnchorError } from "./exceptions/AnchorError";
-import { EventEmitter } from "events";
+import { EventEmitter2 } from "eventemitter2";
 
 /**
  * Main class containing IPFS & OrbiDB instances
  */
-export class AnchorAPI extends EventEmitter {
+export class AnchorAPI extends EventEmitter2 {
 
     /** IPFS instance */
     ipfs: IPFS;

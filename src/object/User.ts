@@ -2,6 +2,7 @@ import { KeyValueStore } from "orbit-db-kvstore";
 import { AnchorAPI } from "../AnchorAPI";
 import { Server } from "./Server";
 import { UserLogEntry } from "./UserLogEntry";
+import { eventEmitter } from "../polyfills"
 
 /**
  * A class representing a user
@@ -35,6 +36,8 @@ export class User {
 
         this.name = userDb.get("name");
         this.servers = await api._getServerData(this.db.get("servers") || []);
+
+        eventEmitter(this.db.events);
         this.db.events.prependListener("replicated", () => {
             this.name = this.db.get("name");
             api._getServerData(this.db.get("servers") || []).then((servers) => {

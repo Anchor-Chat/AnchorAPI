@@ -1,7 +1,7 @@
 import { KeyValueStore } from "orbit-db-kvstore";
 import { AnchorAPI } from "../AnchorAPI";
 import { Server } from "./Server";
-import { UserLogEntry } from "./UserLogEntry";
+import { UserEntry } from "./UserEntry";
 import { eventEmitter } from "../polyfills"
 
 /**
@@ -30,35 +30,32 @@ export class User {
         return this.api.thisUser === this;
     }
 
-    private async _init(api: AnchorAPI, userDb: KeyValueStore<any>) {
-        this.db = userDb;
-        this.api = api;
-
-        this.name = userDb.get("name");
-        this.servers = await api._getServerData(this.db.get("servers") || []);
-
-        eventEmitter(this.db.events);
-        this.db.events.prependListener("replicated", () => {
-            this.name = this.db.get("name");
-            api._getServerData(this.db.get("servers") || []).then((servers) => {
-                this.servers = servers;
-            });
-            this.key = this.db.get("key");
-        });
-    }
-
     /**
      * !!!IMPORTANT!!!
      * Internal use only 
      */
     static async create(api: AnchorAPI, userDb: KeyValueStore<any>): Promise<User> {
         let o = new User();
-        await o._init(api, userDb);
+
+        o.db = userDb;
+        o.api = api;
+
+        o.name = userDb.get("name");
+        o.servers = await api._getServerData(o.db.get("servers") || []);
+
+        eventEmitter(o.db.events).prependListener("replicated", () => {
+            o.name = o.db.get("name");
+            api._getServerData(o.db.get("servers") || []).then((servers) => {
+                o.servers = servers;
+            });
+            o.key = o.db.get("key");
+        });
+
         return o;
     }
 
     toEntry() {
-        return new UserLogEntry(this.login, this.db.address.toString());
+        return new UserEntry(this.login, this.db.address.toString());
     }
 
     toJSON() {

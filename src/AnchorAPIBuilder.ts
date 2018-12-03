@@ -1,5 +1,5 @@
 import { AnchorAPI } from "./AnchorAPI";
-import { UserLogEntry } from "./object/UserLogEntry";
+import { UserEntry } from "./object/UserEntry";
 import { Server } from "./object/Server";
 import sha256 from "crypto-js/sha256";
 import Base64 from "crypto-js/enc-base64";
@@ -110,7 +110,7 @@ export class AnchorAPIBuilder {
 
         let orbitdb = new OrbitDB(this.ipfs, path.join(this.directory, ".orbitdb"));
 
-        let userLog = await orbitdb.log<UserLogEntry>(USER_LOG_NAME, { write: ["*"] });
+        let userLog = await orbitdb.log<UserEntry>(USER_LOG_NAME, { write: ["*"] });
         await userLog.load();
 
         //console.log(userLog.address);
@@ -138,7 +138,7 @@ export class AnchorAPIBuilder {
         await userDB.set("servers", []);
         await userDB.set("privateTextChannels", {});
 
-        await userLog.add(new UserLogEntry(this._login, userDB.address.toString()));
+        await userLog.add(new UserEntry(this._login, userDB.address.toString()));
 
         return await AnchorAPI.create(this.ipfs, orbitdb, userDB, userLog, this._login);
     }
@@ -146,13 +146,13 @@ export class AnchorAPIBuilder {
     /**
      * Logs in to a account with credentials set in [[setLoginAndPassword]].
      */
-    login(orbitdb?: OrbitDB, userLog?: EventStore<UserLogEntry>): Promise<AnchorAPI> {
+    login(orbitdb?: OrbitDB, userLog?: EventStore<UserEntry>): Promise<AnchorAPI> {
         return new Promise<AnchorAPI>(async (resolve, reject) => {
             await this._setDefaults();
 
             orbitdb = orbitdb || new OrbitDB(this.ipfs, path.join(this.directory, ".orbitdb"));
 
-            userLog = userLog || await orbitdb.log<UserLogEntry>(USER_LOG_ADDRESS, { write: ["*"] });
+            userLog = userLog || await orbitdb.log<UserEntry>(USER_LOG_ADDRESS, { write: ["*"] });
             await userLog.load();
 
             userLog.events.once("replicated", async () => {

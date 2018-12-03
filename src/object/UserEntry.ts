@@ -1,7 +1,7 @@
 /**
  * Represents a [[User]] entry in the [[AnchorAPI.userLog]] database.
  */
-export class UserLogEntry {
+export class UserEntry {
     login: string;
     address: string;
 

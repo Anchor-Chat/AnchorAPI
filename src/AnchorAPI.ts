@@ -4,7 +4,7 @@ import { Server } from "./object/Server";
 import { KeyValueStore } from "orbit-db-kvstore";
 import TextChannel from "./object/TextChannel";
 import { ServerBuilder } from "./ServerBuilder";
-import { UserLogEntry } from "./object/UserLogEntry";
+import { UserEntry } from "./object/UserEntry";
 import { EventStore } from "orbit-db-eventstore";
 import { User } from "./object/User";
 import { AnchorError } from "./exceptions/AnchorError";
@@ -21,7 +21,7 @@ export class AnchorAPI extends EventEmitter2 {
     orbitdb: OrbitDB;
 
     /** The database containing "links" to all users dbs */
-    userLog: EventStore<UserLogEntry>;
+    userLog: EventStore<UserEntry>;
 
     /** This user instance */
     thisUser: User;
@@ -29,7 +29,7 @@ export class AnchorAPI extends EventEmitter2 {
     private servers: Server[] = [];
     private users: Map<string, User>;
 
-    private constructor(ipfs: IPFS, orbitdb: OrbitDB, userLog: EventStore<UserLogEntry>) {
+    private constructor(ipfs: IPFS, orbitdb: OrbitDB, userLog: EventStore<UserEntry>) {
         super();
         this.ipfs = ipfs;
         this.orbitdb = orbitdb;
@@ -42,7 +42,7 @@ export class AnchorAPI extends EventEmitter2 {
      * Should never be used.
      * Look at [[AnchorAPIBuilder]] instead
      */
-    static async create(ipfs: IPFS, orbitdb: OrbitDB, db: KeyValueStore<any>, userLog: EventStore<UserLogEntry>, login: string): Promise<AnchorAPI> {
+    static async create(ipfs: IPFS, orbitdb: OrbitDB, db: KeyValueStore<any>, userLog: EventStore<UserEntry>, login: string): Promise<AnchorAPI> {
         let api = new AnchorAPI(ipfs, orbitdb, userLog);
         api.thisUser = await api.getUserData(login, db);
         
@@ -159,8 +159,8 @@ export class AnchorAPI extends EventEmitter2 {
             let key1 = this.thisUser.login+":"+login;
             let key2 = login+":"+this.thisUser.login;
     
-            let c = async () => {
-                return await TextChannel.create(this, db, key);
+            let c = async (users?) => {
+                return await TextChannel.create(this, db, users);
             }
 
             if (textChannels[key1]) {
@@ -198,7 +198,7 @@ export class AnchorAPI extends EventEmitter2 {
                                 login: this.thisUser.login
                             })));
 
-                            resolve(await c());
+                            resolve(await c([this.thisUser, user]));
                         } else if (i==0) {
                             i++;
                         }
@@ -244,19 +244,12 @@ export class AnchorAPI extends EventEmitter2 {
     /**
      * Internal use only
      */ 
-    private _queryUserLog(login: string): UserLogEntry[] {
+    private _queryUserLog(login: string): UserEntry[] {
         return this.userLog
             .iterator({ limit: -1 })
             .collect()
             .map(e => e.payload.value)
             .filter(e => e.login === login)
-    }
-
-    /**
-     * !!!IMPORTANT!!! Internal use only
-     */ 
-    private async _dbToUser(userDb: KeyValueStore<any>): Promise<User> {
-        return await User.create(this, userDb);
     }
 
     /**
@@ -272,7 +265,7 @@ export class AnchorAPI extends EventEmitter2 {
             db = db == undefined ? await this.orbitdb.kvstore(userLogEntry.address) : db;
             await db.load();
 
-            let user = await this._dbToUser(db);
+            let user = await User.create(this, db);
             user.login = login;
     
             this.users.set(login, user);
@@ -282,5 +275,3 @@ export class AnchorAPI extends EventEmitter2 {
         }
     }
 }
-
-//export default AnchorAPI;

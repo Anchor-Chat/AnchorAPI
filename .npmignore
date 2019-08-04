@@ -1,5 +1,4 @@
 tsconfig.json
-src
 .gitignore
 .orbitdb
 .jsipfs
@@ -14,3 +13,5 @@ dist
 gulpfile.*
 README.md
 .vscode
+src-ts
+.github

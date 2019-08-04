@@ -19,9 +19,11 @@ https://anchor-chat.github.io/AnchorAPI/
 # Getting started
 This is how you start:
 ```js
+const { AnchorAPIBuilder } = require("@anchor-chat/anchor-api");
+
 new AnchorAPIBuilder()
     .setDirectory(".anchor") // Not needed but recommended
-    .setLoginAndPassword("login", "password")
+    .setCredentials("login", "password")
     .createAccount() // Or login()
     .then(async (api) => {
         // Magic!

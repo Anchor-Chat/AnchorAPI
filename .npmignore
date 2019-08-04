@@ -5,8 +5,12 @@ src
 .jsipfs
 scripts
 test
-dist/browser
 .anchor*
 scripts
-dist/docs
-dist/browser
+.babelrc
+docs
+dist
+.travis.yml
+gulpfile.*
+README.md
+.vscode

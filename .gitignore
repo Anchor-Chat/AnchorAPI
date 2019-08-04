@@ -142,4 +142,6 @@ $RECYCLE.BIN/
 /preview
 /.orbitdb
 /.jsipfs
-/.anchor*
+*/.anchor*
+/src-ts
+*.a*

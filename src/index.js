@@ -1,0 +1,15 @@
+"use strict";
+
+require("core-js/stable");
+require("regenerator-runtime/runtime");
+
+// Main
+module.exports = {
+	AnchorAPIBuilder: require("./AnchorAPIBuilder"),
+	AnchorAPI: require("./AnchorAPI")
+}
+
+
+if (typeof(window) === "object") {
+	window.Anchor = module.exports;
+}

@@ -1,16 +1,14 @@
 {
-  "name": "@anchor-chat/anchor-api",
+  "name": "@anchor/anchor-api",
   "version": "1.0.4",
   "description": "A package that allows you to communicate with the Anchor Chat",
   "main": "dist/node/index.js",
   "types": "dist/node/index.d.ts",
   "scripts": {
-    "dist": "npm run build && npm run bundle && npm run docs",
-    "build": "mkdir -p dist/node && tsc",
-    "bundle": "mkdir -p dist/browser && browserify src/index.ts -p [ tsify ] -d | exorcist dist/browser/anchor-api.js.map > dist/browser/anchor-api.js && uglifyjs dist/browser/anchor-api.js --source-map \"filename='dist/browser/anchor-api.map.js',url='anchor-api.min.js.map'\" -m -c -o dist/browser/anchor-api.min.js",
-    "docs": "mkdir -p dist/docs && typedoc --out dist/docs --mode modules ./src/",
-    "test": "npm run build && mocha --timeout 200000",
-    "prepare": "require-self"
+    "dist": "npm run build && npm run docs",
+    "build": "gulp browserify",
+    "docs": "mkdir docs && typedoc --out docs --mode modules ./src/",
+    "test": "npm run build && mocha --timeout 200000"
   },
   "repository": {
     "type": "git",
@@ -31,27 +29,27 @@
   },
   "homepage": "https://github.com/Anchor-Chat/AnchorAPI#readme",
   "devDependencies": {
-    "@types/node": "^10.12.9",
-    "browserify": "^16.2.3",
-    "exorcist": "^1.0.1",
-    "mkdirp": "^0.5.1",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/register": "^7.5.5",
+    "babelify": "^10.0.0",
+    "browserify": "^16.3.0",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-uglify": "^3.0.2",
     "mocha": "^5.2.0",
-    "require-self": "^0.2.1",
-    "ts-node": "^7.0.1",
-    "tsify": "^4.0.0",
-    "typedoc": "^0.13.0",
-    "typescript": "^3.1.6",
-    "rimraf": "^2.6.2",
-    "uglify-es": "^3.3.9"
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
-    "@types/crypto-js": "^3.1.43",
-    "@types/ipfs": "git+https://github.com/lukas2005/types-ipfs.git",
-    "@types/orbit-db": "git+https://github.com/lukas2005/orbit-db-types.git",
-    "crypto-js": "^3.1.9-1",
-    "eventemitter2": "^5.0.1",
-    "ipfs": "^0.32.3",
-    "orbit-db": "^0.19.9",
+    "core-js": "^3.1.4",
+    "crypto-browserify": "^3.12.0",
+    "eventemitter3": "^4.0.0",
+    "ipfs": "^0.36.4",
+    "orbit-db": "^0.21.4",
+    "orbit-db-access-controllers": "^0.2.2",
+    "regenerator-runtime": "^0.13.3",
     "uuid": "^3.3.2"
   }
 }

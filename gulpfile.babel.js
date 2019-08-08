@@ -20,6 +20,6 @@ gulp.task('browserify', () => {
 		.pipe(sourcemaps.init({ loadMaps: true }))
 		.pipe(babel())
 		.pipe(uglify())
-		.pipe(sourcemaps.write("./"))
+		.pipe(sourcemaps.write())
 		.pipe(gulp.dest("./dist"));
 });

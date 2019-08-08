@@ -17,7 +17,11 @@ class DMHelper {
 	}
 
 	static async create(orbitdb, api) {
-		let dmLog = await orbitdb.log(Reference.DM_LOG_DB, { write: ["*"] });
+		let dmLog = await orbitdb.log(Reference.DM_LOG_NAME, {
+			accessController: {
+				write: ["*"]
+			}
+		});
 		await dmLog.load();
 
 		return new DMHelper(dmLog, orbitdb, api);
@@ -48,8 +52,11 @@ class DMHelper {
 	async newDMChannel(recipient) {
 		let id = uuidv4();
 
+		// TODO: Create custom access controller for DMs
 		let channelDb = await this.orbitdb.kvstore(`Anchor-Chat/dmChannels/${id}`, {
-
+			accessController: {
+				write: ["*"]
+			}
 		});
 		await channelDb.load();
 
@@ -61,7 +68,7 @@ class DMHelper {
 			this.api.user.login,
 			recipient.login
 		]);
-
+		require("browserify-sign")
 		let passphrase = crypto.randomBytes(32);
 
 		let myKey = crypto.publicEncrypt(this.api.publicKey, passphrase).toString("hex");

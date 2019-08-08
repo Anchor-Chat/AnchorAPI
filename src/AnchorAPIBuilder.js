@@ -14,13 +14,24 @@ AccessControllers.addAccessController({ AccessController: AnchorAccessController
 
 const path = require("path");
 const crypto = require("crypto");
+const Promise = require("bluebird");
+
+const generateKeyPairPromise = (type, options) => {
+	return new Promise((resolve, reject) => {
+		crypto.generateKeyPair(type, options, (err, publicKey, privateKey) => {
+			resolve({
+				publicKey,
+				privateKey
+			})
+		});
+	})
+}
 
 const Reference = require("./Reference");
 
 class AnchorAPIBuilder {
 
 	constructor() {
-		this.setDirectory(".anchor");
 		this.ipfs = null;
 		this.ipfsOpts = {};
 		this.orbitdb = null;
@@ -76,7 +87,7 @@ class AnchorAPIBuilder {
      */
 	_setDefaults() {
 		return new Promise((resolve, reject) => {
-			if (this.ipfs === null) {
+			if (!this.ipfs) {
 				this.ipfs = IPFS.createNode({
 					EXPERIMENTAL: {
 						pubsub: true
@@ -97,16 +108,31 @@ class AnchorAPIBuilder {
 						AccessControllers: AccessControllers
 					});
 
-					this.userLog = await this.orbitdb.log(Reference.USER_LOG_DB, { write: ["*"] });
+					// await api.orbitdb.determineAddress('Anchor-Chat/userLog', 'eventlog', {
+					// 	accessController: {
+					// 		write: ["*"]
+					// 	}
+					// })
+
+					this.userLog = await this.orbitdb.log(Reference.USER_LOG_NAME, {
+						accessController: {
+							write: ["*"]
+						}
+					});
+
 					await this.userLog.load();
 				}
 
-				resolve();
+				return resolve();
 			}
 
 			if (!this.ipfs.isOnline()) {
-				this.ipfs.on("ready", () => {
-					console.log("Hi")
+				this.ipfs.on("ready", async () => {
+					try {
+						await this.ipfs.swarm.connect("/dns4/ams-1.bootstrap.libp2p.io/tcp/443/wss/ipfs/QmSoLer265NRgSp2LA3dPaeykiS1J6DifTC88f5uVQKNAd")
+					} catch (err) {
+						console.log(err);
+					}
 					fun();
 				});
 			} else {
@@ -131,6 +157,7 @@ class AnchorAPIBuilder {
 			return await this.login(u);
 		}
 
+		// TODO: Create custom access controller for User DBs
 		const userDB = await this.orbitdb.kvstore("Anchor-Chat/" + this._login, {
 			accessController: {
 				//type: "anchorAccessController"
@@ -149,7 +176,7 @@ class AnchorAPIBuilder {
 		await profile.setField("username", this._login);
 		//await profile.setField("password", passHash.toString("hex"), true);
 
-		const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+		const { publicKey, privateKey } = await generateKeyPairPromise('rsa', {
 			modulusLength: 4096,
 			publicKeyEncoding: {
 				type: 'spki',
@@ -166,7 +193,7 @@ class AnchorAPIBuilder {
 		await profile.setField("publicKey", publicKey);
 		await profile.setField("privateKey", privateKey, true);
 
-		return await AnchorAPI.create(profile, this.orbitdb, this.ipfs);
+		return await AnchorAPI.create(profile, this.orbitdb, this.ipfs, this.userLog);
 	}
 
     /**

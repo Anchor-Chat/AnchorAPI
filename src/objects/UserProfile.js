@@ -27,12 +27,11 @@ class UserProfile {
 		let fields = this.db.get("fields")
 		let obj = fields[key] || {};
 
-		if (obj.isPrivate && this.key) {
-			console.log(obj.iv)
+		if (obj.isPrivate) {
+			if (!this.key) throw new Error("Cipher not provided!");
+			
 			let decipher = crypto.createDecipheriv(algo, this.key, obj.iv);
 			obj.value = decipher.update(obj.value, "hex", "utf8") + decipher.final("utf8");
-		} else if (!this.key) {
-			throw new Error("Cipher not provided!");
 		}
 
 		//console.log(obj.value);
@@ -42,7 +41,7 @@ class UserProfile {
 	async setField(key, value, isPrivate) {
 		let entry = {
 			value: JSON.stringify(value),
-			isPrivate
+			isPrivate: isPrivate || false
 		};
 
 		if (isPrivate && this.key) {
@@ -51,14 +50,12 @@ class UserProfile {
 			let cipher = crypto.createCipheriv(algo, this.key, iv);
 			entry.value = cipher.update(entry.value, "utf8", "hex") + cipher.final("hex");
 			entry.iv = iv;
-			console.log(iv);
 		} else if (!this.key) {
 			throw new Error("Cipher not provided!");
 		}
 
 		let obj = this.db.get("fields") || {};
 
-		if (!isPrivate) console.log(entry.value);
 		obj[key] = entry;
 
 		return await this.db.set("fields", obj);

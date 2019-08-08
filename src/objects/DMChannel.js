@@ -9,7 +9,6 @@ class DMChannel extends TextChannel {
 	constructor(channelData, api) {
 		super(channelData, api);
 
-		console.log(channelData.getField("keys"))
 		let keyEnc = Buffer.from(channelData.getField("keys")[api.user.login], "hex");
 		this.key = crypto.privateDecrypt(api.privateKey, keyEnc);
 	}

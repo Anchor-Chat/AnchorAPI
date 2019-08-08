@@ -26,7 +26,7 @@ class TextChannel extends Channel {
 	async entryIntoMsg(data, _, __, altVerif) {
 		let author = await this.api.getUserData(data.author);
 
-		let verify = crypto.createVerify("sha256");
+		let verify = crypto.createVerify("RSA-SHA256");
 		verify.update(altVerif || data.content);
 		verify.end();
 
@@ -45,7 +45,7 @@ class TextChannel extends Channel {
 	async send(content, options, data) {
 		let messages = this.channelData.getField("messages");
 
-		let sign = crypto.createSign("sha256");
+		let sign = crypto.createSign("RSA-SHA256");
 		sign.update(content);
 		sign.end();
 

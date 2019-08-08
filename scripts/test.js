@@ -1,30 +1,37 @@
 "use strict";
 const {
-	AnchorAPIBuilder,
-	AnchorAPI
-} = require("../src/index");
+	AnchorAPIBuilder
+} = require("@anchor-chat/anchor-api");
 
 //rimraf(".jsipfs", () => {
 //	rimraf(".orbitdb", () => {
-		console.log("Cleanup done");
-		new AnchorAPIBuilder()
-			.setCredentials("lukas2005", "Hi")
-			.setDirectory(".a1")
-			.createAccount()
-			.catch(console.error)
-			.then(async (api) => {
-				console.log("Start")
+console.log("Cleanup done");
+new AnchorAPIBuilder()
+	.setCredentials("node_person", "Hi")
+	.setDirectory(".a1")
+	.createAccount()
+	.catch(console.error)
+	.then(async (api) => {
+		console.log("Start")
 
-				//if (api) await api.close();
+		//if (api) await api.close();
 
-				let dm = await ((await api.getUserData("lukas2005")).createDM());
+		//let dm = await ((await api.getUserData("lukas2005")).createDM());
 
-				dm.send("fuck your face (from login)");
+		//dm.send("fuck your face (from login)");
 
-				console.log(await dm.getMessages());
+		console.log(api.userLog);
 
-				console.log("Quit")
-				//process.exit();
-			});
+		console.log("Quit")
+		//process.exit();
+	});
 //	});
 //});
+
+(async () => {
+	window.db = await ob.kvstore("hello", {
+		accessController: {
+			write: ["*"]
+		}
+	});
+})();

@@ -66,6 +66,10 @@ class AnchorAPI extends EventEmitter {
 		}
 	}
 
+	getDMChannels() {
+		return this.dmHelper.getChannels();
+	}
+
     /**
      * Gets a [[User]] instance by login.
      */

@@ -13,13 +13,13 @@ class DMChannel extends TextChannel {
 		this.key = crypto.privateDecrypt(api.privateKey, keyEnc);
 	}
 
-	async entryIntoMsg(data) {
+	async _entryIntoMsg(data) {
 		let decipher = crypto.createDecipheriv("aes256", this.key, data.iv);
 
 		let encrypted = data.content;
 		data.content = decipher.update(data.content, 'hex', 'utf8') + decipher.final('utf8');
 
-		return await super.entryIntoMsg(data, null, null, encrypted);
+		return await super._entryIntoMsg(data, null, null, encrypted);
 	}
 
 	async send(content, options) {

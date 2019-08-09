@@ -35,8 +35,10 @@ class AnchorAPIBuilder {
 		this.ipfs = null;
 		this.ipfsOpts = {};
 		this.orbitdb = null;
+
+		this.login = null;
 		this.password = null;
-		this._login = null;
+		
 		this.directory = ".anchor";
 	}
 
@@ -66,7 +68,7 @@ class AnchorAPIBuilder {
 
 		this.password = password;
 
-		this._login = login;
+		this.login = login;
 
 		return this;
 	}
@@ -151,14 +153,14 @@ class AnchorAPIBuilder {
 			.iterator({ limit: -1 })
 			.collect()
 			.map(e => e.payload.value)
-			.filter(e => e.login === this._login)[0] || null;
+			.filter(e => e.login === this.login)[0] || null;
 
 		if (u) {
 			return await this.login(u);
 		}
 
 		// TODO: Create custom access controller for User DBs
-		const userDB = await this.orbitdb.kvstore("Anchor-Chat/" + this._login, {
+		const userDB = await this.orbitdb.kvstore("Anchor-Chat/" + this.login, {
 			accessController: {
 				//type: "anchorAccessController"
 			}
@@ -169,11 +171,11 @@ class AnchorAPIBuilder {
 			.update(this.password)
 			.digest();
 
-		let profile = new UserProfile(userDB, this._login, passHash);
+		let profile = new UserProfile(userDB, this.login, passHash);
 
 		await this.userLog.add(profile.getEntry());
 
-		await profile.setField("username", this._login);
+		await profile.setField("username", this.login);
 		//await profile.setField("password", passHash.toString("hex"), true);
 
 		const { publicKey, privateKey } = await generateKeyPairPromise('rsa', {
@@ -206,7 +208,7 @@ class AnchorAPIBuilder {
 			.iterator({ limit: -1 })
 			.collect()
 			.map(e => e.payload.value)
-			.filter(e => e.login === this._login)[0] || null;
+			.filter(e => e.login === this.login)[0] || null;
 
 		if (u) {
 			const userDB = await this.orbitdb.kvstore(u.address, {
@@ -220,7 +222,7 @@ class AnchorAPIBuilder {
 				.update(this.password)
 				.digest();
 
-			let profile = new UserProfile(userDB, this._login, passHash);
+			let profile = new UserProfile(userDB, this.login, passHash);
 
 			// await profile.setField("hi", "ewww")
 			// console.log(profile.getField("hi"));
@@ -231,7 +233,7 @@ class AnchorAPIBuilder {
 				throw new AuthError("Wrong password provided!");
 			}
 		} else {
-			throw new AuthError(`Account with login "${this._login}" doesn't exist`);
+			throw new AuthError(`Account with login "${this.login}" doesn't exist`);
 		}
 	}
 

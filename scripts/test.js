@@ -1,7 +1,5 @@
 "use strict";
-const {
-	AnchorAPIBuilder
-} = require("@anchor-chat/anchor-api");
+const { AnchorAPIBuilder } = require("@anchor-chat/anchor-api");
 
 //rimraf(".jsipfs", () => {
 //	rimraf(".orbitdb", () => {
@@ -18,9 +16,7 @@ new AnchorAPIBuilder()
 
 		//let dm = await ((await api.getUserData("lukas2005")).createDM());
 
-		//dm.send("fuck your face (from login)");
-
-		console.log(api.userLog);
+		console.log(api);
 
 		console.log("Quit")
 		//process.exit();

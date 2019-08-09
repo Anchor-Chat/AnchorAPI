@@ -35,18 +35,22 @@ class DMHelper {
 			.filter(e => e.members.includes(recipient.login) && e.members.includes(this.api.user.login))[0] || null;
 
 		if (channelEntry) {
-			let channelDb = await this.api.orbitdb.kvstore(channelEntry.address, {
-
-			});
-			await channelDb.load();
-
-			let channelData = new ChannelData(channelDb);
-			let channel = new DMChannel(channelData, this.api);
-
-			return channel;
+			return await this.entryToChannel(channelEntry);
 		} else {
 			return await this.newDMChannel(recipient);
 		}
+	}
+
+	async entryToChannel(channelEntry) {
+		let channelDb = await this.api.orbitdb.kvstore(channelEntry.address, {
+
+		});
+		await channelDb.load();
+
+		let channelData = new ChannelData(channelDb);
+		let channel = new DMChannel(channelData, this.api);
+
+		return channel;
 	}
 
 	async newDMChannel(recipient) {
@@ -96,6 +100,26 @@ class DMHelper {
 		return channel;
 	}
 
+	getChannels() {
+		let channelEntries = this.db
+			.iterator({ limit: -1 })
+			.collect()
+			.map(e => e.payload.value)
+			.filter(e => e.members.includes(this.api.user.login));
+
+
+		let promises = [];
+		channelEntries.forEach((e) => {
+			promises.push((async () => {
+				// let login = e.members.filter(this.api.user.login)[0];
+				// let user = this.api.getUserData(login);
+
+				return await this.entryToChannel(e);
+			})());
+		});
+
+		return Promise.all(promises);
+	}
 }
 
 module.exports = DMHelper;

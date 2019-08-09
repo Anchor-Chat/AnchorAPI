@@ -8,7 +8,7 @@ class TextChannel extends Channel {
 	async getMessages() {
 		let msgData = this.channelData.getField("messages");
 		if (msgData.length != this._cache.length) {
-			this._cache = await Promise.all(msgData.map(this.entryIntoMsg, this));
+			this._cache = await Promise.all(msgData.map(this._entryIntoMsg, this));
 		}
 		return this._cache;
 	}
@@ -23,7 +23,7 @@ class TextChannel extends Channel {
 		this._cache = [];
 	}
 
-	async entryIntoMsg(data, _, __, altVerif) {
+	async _entryIntoMsg(data, _, __, altVerif) {
 		let author = await this.api.getUserData(data.author);
 
 		let verify = crypto.createVerify("RSA-SHA256");

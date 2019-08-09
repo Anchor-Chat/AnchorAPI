@@ -4,17 +4,21 @@ const crypto = require("crypto");
 
 class DMChannel extends TextChannel {
 
-	get members() {
-		return this.channelData.getField("members")
-			.filter(e => e.login !== this.api.user.login)
-			.map(this.api.getUserData, this.api)
-	}
-
 	constructor(channelData, api) {
 		super(channelData, api);
 
 		let keyEnc = Buffer.from(channelData.getField("keys")[api.user.login], "hex");
 		this.key = crypto.privateDecrypt(api.privateKey, keyEnc);
+
+		this.members = [];
+	}
+
+	async _init() {
+		this.members = await Promise.all(
+			this.channelData.getField("members")
+				.filter(e => e.login !== this.api.user.login)
+				.map(this.api.getUserData, this.api)
+		);
 	}
 
 	async _entryIntoMsg(data) {

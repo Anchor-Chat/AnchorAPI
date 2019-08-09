@@ -145,8 +145,8 @@ declare module "@anchor-chat/anchor-api" {
 		key: Buffer;
 	}
 
-	class DMChannelEntry {
-		members: User[];
+	interface DMChannelEntry {
+		members: string[];
 		addres: string;
 	}
 

@@ -88,6 +88,8 @@ class DMHelper {
 
 		let channel = new DMChannel(channelData, this.api);
 
+		await channel._init();
+
 		await this.db.add({
 			members: memberLogins,
 			address: channelDb.address.toString(),
@@ -110,6 +112,10 @@ class DMHelper {
 
 		let channelData = new ChannelData(channelDb);
 		let channel = new DMChannel(channelData, this.api);
+
+		await channel._init();
+
+		this.channels.set(channel.id, channel);
 
 		return channel;
 	}

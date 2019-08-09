@@ -4,7 +4,11 @@ const crypto = require("crypto");
 
 class DMChannel extends TextChannel {
 
-	get recipient() { return this.api.getUserData(this.channelData.getField("members")[1]); }
+	get members() {
+		return this.channelData.getField("members")
+			.filter(e => e.login !== this.api.user.login)
+			.map(this.api.getUserData, this.api)
+	}
 
 	constructor(channelData, api) {
 		super(channelData, api);

@@ -27,22 +27,40 @@ class DMHelper {
 		return new DMHelper(dmLog, orbitdb, api);
 	}
 
-	async getChannelFor(recipient) {
+	async getChannelFor(user) {
 		let channelEntry = this.db
 			.iterator({ limit: -1 })
 			.collect()
 			.map(e => e.payload.value)
-			.filter(e => e.members.includes(recipient.login) && e.members.includes(this.api.user.login))[0] || null;
+			.filter(e => this.arraysEqual(e.members, [user.login, this.api.user.login]))[0] || null;
 
 		if (channelEntry) {
 			return await this.entryToChannel(channelEntry);
 		} else {
-			return await this.newDMChannel(recipient);
+			return await this.newDMChannel([user]);
 		}
 	}
 
-	async newDMChannel(recipient) {
+	async getGroupChannelFor(members) {
+		let memberLogins = members.map(m => m.login);
+		let channelEntry = this.db
+			.iterator({ limit: -1 })
+			.collect()
+			.map(e => e.payload.value)
+			.filter(e => this.arraysEqual(e.members, memberLogins))[0] || null;
+
+		if (channelEntry) {
+			return await this.entryToChannel(channelEntry);
+		} else {
+			return await this.newDMChannel(members);
+		}
+	}
+
+	async newDMChannel(members) {
 		let id = uuidv4();
+
+		if (!members.includes(this.api.user))
+			members.push(this.api.user);
 
 		// TODO: Create custom access controller for DMs
 		let channelDb = await this.orbitdb.kvstore(`Anchor-Chat/dmChannels/${id}`, {
@@ -53,35 +71,24 @@ class DMHelper {
 		await channelDb.load();
 
 		let channelData = new ChannelData(channelDb);
-
-		await Channel.init(channelData, "dm");
-
-		await channelData.setField("members", [
-			this.api.user.login,
-			recipient.login
-		]);
+		await Channel.init(channelData, "dm", id);
 
 		let passphrase = crypto.randomBytes(32);
+		let keys = {};
 
-		let myKey = crypto.publicEncrypt(this.api.publicKey, passphrase).toString("hex");
-		let recKey = crypto.publicEncrypt(recipient.userProfile.getField("publicKey"), passphrase).toString("hex");
-
-		let keys = {
-			[this.api.user.login]: myKey,
-			[recipient.login]: recKey
-		};
+		members.forEach((member) => {
+			keys[member.login] = crypto.publicEncrypt(member.userProfile.getField("publicKey"), passphrase).toString("hex");
+		})
 
 		await channelData.setField("keys", keys);
 
-		await channelData.setField("id", id);
+		let memberLogins = members.map(m => m.login);
+		await channelData.setField("members", memberLogins);
 
 		let channel = new DMChannel(channelData, this.api);
 
 		await this.db.add({
-			members: [
-				this.api.user.login,
-				recipient.login
-			],
+			members: memberLogins,
 			address: channelDb.address.toString()
 		});
 
@@ -111,14 +118,27 @@ class DMHelper {
 		let promises = [];
 		channelEntries.forEach((e) => {
 			promises.push((async () => {
-				// let login = e.members.filter(this.api.user.login)[0];
-				// let user = this.api.getUserData(login);
-
 				return await this.entryToChannel(e);
 			})());
 		});
 
 		return Promise.all(promises);
+	}
+
+	arraysEqual(a, b) {
+		if (a === b) return true;
+		if (a == null || b == null) return false;
+		if (a.length != b.length) return false;
+
+		// If you don't care about the order of the elements inside
+		// the array, you should sort both arrays here.
+		// Please note that calling sort on an array will modify that array.
+		// you might want to clone your array first.
+
+		for (var i = 0; i < a.length; ++i) {
+			if (a[i] !== b[i]) return false;
+		}
+		return true;
 	}
 }
 

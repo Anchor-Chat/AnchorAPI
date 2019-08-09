@@ -65,11 +65,9 @@ class AnchorAPIBuilder {
      * Sets the login and password.
      */
 	setCredentials(login, password) {
-
-		this.password = password;
-
 		this._login = login;
-
+		this.password = password;
+		
 		return this;
 	}
 

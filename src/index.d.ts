@@ -30,7 +30,6 @@ declare module "@anchor-chat/anchor-api" {
 	}
 
 	export class AnchorAPI extends EventEmitter {
-
 		userProfile: UserProfile;
 		user: User;
 
@@ -38,7 +37,7 @@ declare module "@anchor-chat/anchor-api" {
 		orbitdb: OrbitDB;
 		userLog: any;
 
-		dmHelper: DMHelper;
+		private dmHelper: DMHelper;
 
 		publicKey: string;
 		privateKey: string;
@@ -106,7 +105,7 @@ declare module "@anchor-chat/anchor-api" {
 
 		constructor(channelData: ChannelData, api: AnchorAPI);
 
-		private static init(channelData, type): Promise<ChannelData>;
+		private static init(channelData: ChannelData, type: string, id: string): Promise<ChannelData>;
 
 		delete(): Promise<void>;
 	}
@@ -140,7 +139,7 @@ declare module "@anchor-chat/anchor-api" {
 	}
 
 	class DMChannel extends TextChannel {
-		recipient: User;
+		members: User[];
 
 		key: Buffer;
 	}
@@ -151,7 +150,6 @@ declare module "@anchor-chat/anchor-api" {
 	}
 
 	class DMHelper {
-
 		db: any;
 		orbitdb: OrbitDB;
 		api: AnchorAPI;
@@ -160,8 +158,9 @@ declare module "@anchor-chat/anchor-api" {
 
 		static create(orbitdb: OrbitDB, api: AnchorAPI): Promise<DMHelper>;
 	
-		getChannelFor(recipient: User): Promise<DMChannel>;
-		newDMChannel(recipient: User): Promise<DMChannel>;
+		getChannelFor(user: User): Promise<DMChannel>;
+		getGroupChannelFor(members: User[]): Promise<DMChannel>;
+		newDMChannel(members: User[]): Promise<DMChannel>;
 
 		private entryToChannel(channelEntry: DMChannelEntry): Promise<DMChannel>;
 

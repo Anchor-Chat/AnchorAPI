@@ -102,6 +102,7 @@ declare module "@anchor-chat/anchor-api" {
 		createdAt: number;
 		type: string;
 		deleted: boolean;
+		id: string;
 
 		constructor(channelData: ChannelData, api: AnchorAPI);
 

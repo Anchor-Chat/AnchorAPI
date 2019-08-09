@@ -6,7 +6,8 @@ const crypto = require("crypto")
 crypto.generateKeyPair = require("browser-keygen").generateKeyPair;
 
 module.exports = {
-	AnchorAPIBuilder: require("./AnchorAPIBuilder")
+	AnchorAPIBuilder: require("./AnchorAPIBuilder"),
+	AnchorAPI: require("./AnchorAPI")
 };
 window.anchor = module.exports;
 window.Ipfs = require("ipfs");

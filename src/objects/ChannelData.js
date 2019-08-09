@@ -1,9 +1,6 @@
 "use strict";
 const crypto = require("crypto");
 
-const algo = "aes256"
-const iv = Buffer.alloc(16, 0);
-
 class ChannelData {
 
 	get name() { return this.getField("name") };

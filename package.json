@@ -4,7 +4,7 @@
   "description": "A package that allows you to communicate with the Anchor Chat",
   "main": "src/index.js",
   "browser": "src/browser.js",
-  "typings": "src/index.d.ts",
+  "types": "src/index.d.ts",
   "scripts": {
     "dist": "npm run build && npm run docs",
     "build": "gulp browserify",

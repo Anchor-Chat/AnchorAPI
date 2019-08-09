@@ -1,6 +1,7 @@
 import EventEmitter from "eventemitter3";
 import IPFS from "ipfs";
 import OrbitDB from "orbit-db";
+import { options } from "@/router";
 
 declare module "@anchor-chat/anchor-api" {
 
@@ -10,7 +11,7 @@ declare module "@anchor-chat/anchor-api" {
 		ipfsOpts: any;
 		orbitdb: OrbitDB;
 
-		login: string;
+		_login: string;
 		password: string;
 
 		directory: string; 
@@ -22,19 +23,16 @@ declare module "@anchor-chat/anchor-api" {
 		setCredentials(login: string, password: string): AnchorAPIBuilder;
 		setIPFSConfig(opts: any): AnchorAPIBuilder;
 
-		private async _setDefaults(opts: any): AnchorAPIBuilder;
+		private _setDefaults(opts: any): Promise<AnchorAPIBuilder>;
 
-		async createAccount(): Promise<AnchorAPI>;
-		async login(): Promise<AnchorAPI>;
+		createAccount(): Promise<AnchorAPI>;
+		login(): Promise<AnchorAPI>;
 	}
 
-	declare class AnchorAPI extends EventEmitter {
-
-		get user(): User;
-
-		get publicKey(): string;
+	export class AnchorAPI extends EventEmitter {
 
 		userProfile: UserProfile;
+		user: User;
 
 		ipfs: IPFS;
 		orbitdb: OrbitDB;
@@ -42,6 +40,7 @@ declare module "@anchor-chat/anchor-api" {
 
 		dmHelper: DMHelper;
 
+		publicKey: string;
 		privateKey: string;
 
 		users: { [key: string]: User }
@@ -53,14 +52,14 @@ declare module "@anchor-chat/anchor-api" {
 		getUsers(): User[];
 		getUsersByName(): User[];
 		getUserByLogin(login: string): User;
-		async getUserData(): User;
+		getUserData(): Promise<User>;
 
 		getDMChannels(): DMChannel[];
 
-		async close(): void;
+		close(): Promise<void>;
 	}
 
-	declare class UserProfile {
+	class UserProfile {
 		login: string;
 		db: any;
 		key: Buffer;
@@ -69,7 +68,7 @@ declare module "@anchor-chat/anchor-api" {
 		values(): any[];
 
 		getField(key: string): any;
-		async setField(key: string, value: any, isPrivate?: boolean): void;
+		setField(key: string, value: any, isPrivate?: boolean): Promise<void>;
 
 		private reEncrypt(newKey: Buffer): Promise<void>;
 
@@ -78,50 +77,94 @@ declare module "@anchor-chat/anchor-api" {
 		getEntry(): { login: string, address: string };
 	}
 
-	declare class User {
-		get login(): string;
-		get username(): string;
+	class User {
+		login: string;
+		username: string;
 
 		private constructor(userProfile: UserProfile, api: AnchorAPI);
 
-		async createDM(): DMChannel;
-		async deleteDM(): void;
+		createDM(): Promise<DMChannel>;
+		deleteDM(): Promise<void>;
 	}
 
-	declare class ChannelData {
+	class ChannelData {
+		name: string;
 
+		db: any;
+
+		keys(): string[];
+		values(): any[];
+
+		getField(key: string): any;
+		setField(key: string, value: any, isPrivate?: boolean): Promise<void>;
 	}
 
-	declare class Channel {
-		get createdAt(): number;
-		get type(): string;
-		get deleted(): boolean;
+	class Channel {
+		createdAt: number;
+		type: string;
+		deleted: boolean;
 
-		private constructor(channelData: ChannelData, api: AnchorAPI);
+		constructor(channelData: ChannelData, api: AnchorAPI);
 
-		private static async init(channelData, type): ChannelData;
+		private static init(channelData, type): Promise<ChannelData>;
 
-		async delete(): void;
+		delete(): Promise<void>;
+	}
+
+	interface MessageOptions {
+
 	}
 
 	interface MessageData {
-
+		content: string
+		signature: string
+		author: string
+		options: MessageOptions
 	}
 
-	declare class TextChannel extends Channel {
+	class Message {
+		content: string;
+		signature: string;
+		verified: boolean;
+
+		author: User;
+		channel: TextChannel;
+	}
+
+	class TextChannel extends Channel {
 		getMessages(): Message[];
 
-		private constructor(channelData: ChannelData, api: AnchorAPI);
-		private async _entryIntoMsg(data: MessageData, _, __, altVerif: string);
+		private _entryIntoMsg(data: MessageData, _, __, altVerif: string): Promise<Message>;
 
-		async send()
+		send(content: string, options?: MessageOptions, data?: any): Promise<void>
 	}
 
-	declare class DMChannel extends TextChannel {
+	class DMChannel extends TextChannel {
+		recipient: User;
 
+		key: Buffer;
 	}
 
-	declare class DMHelper {
+	class DMChannelEntry {
+		members: User[];
+		addres: string;
+	}
 
+	class DMHelper {
+
+		db: any;
+		orbitdb: OrbitDB;
+		api: AnchorAPI;
+
+		constructor(db: any, orbitdb: OrbitDB, api: AnchorAPI);
+
+		static create(orbitdb: OrbitDB, api: AnchorAPI): Promise<DMHelper>;
+	
+		getChannelFor(recipient: User): Promise<DMChannel>;
+		newDMChannel(recipient: User): Promise<DMChannel>;
+
+		private entryToChannel(channelEntry: DMChannelEntry): Promise<DMChannel>;
+
+		getChannels(): Promise<DMChannel[]>;
 	}
 }

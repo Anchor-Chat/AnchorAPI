@@ -41,18 +41,6 @@ class DMHelper {
 		}
 	}
 
-	async entryToChannel(channelEntry) {
-		let channelDb = await this.api.orbitdb.kvstore(channelEntry.address, {
-
-		});
-		await channelDb.load();
-
-		let channelData = new ChannelData(channelDb);
-		let channel = new DMChannel(channelData, this.api);
-
-		return channel;
-	}
-
 	async newDMChannel(recipient) {
 		let id = uuidv4();
 
@@ -72,7 +60,7 @@ class DMHelper {
 			this.api.user.login,
 			recipient.login
 		]);
-		require("browserify-sign")
+
 		let passphrase = crypto.randomBytes(32);
 
 		let myKey = crypto.publicEncrypt(this.api.publicKey, passphrase).toString("hex");
@@ -96,6 +84,18 @@ class DMHelper {
 			],
 			address: channelDb.address.toString()
 		});
+
+		return channel;
+	}
+
+	async entryToChannel(channelEntry) {
+		let channelDb = await this.api.orbitdb.kvstore(channelEntry.address, {
+
+		});
+		await channelDb.load();
+
+		let channelData = new ChannelData(channelDb);
+		let channel = new DMChannel(channelData, this.api);
 
 		return channel;
 	}

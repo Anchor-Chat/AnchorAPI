@@ -4,5 +4,6 @@ require("regenerator-runtime/runtime");
 
 // Main
 module.exports = {
-	AnchorAPIBuilder: require("./AnchorAPIBuilder")
+	AnchorAPIBuilder: require("./AnchorAPIBuilder"),
+	AnchorAPI: require("./AnchorAPI")
 }

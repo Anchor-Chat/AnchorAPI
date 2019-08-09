@@ -14,6 +14,7 @@ class DMHelper {
 		this.db = db;
 		this.orbitdb = orbitdb;
 		this.api = api;
+		this.channels = new Map();
 	}
 
 	static async create(orbitdb, api) {
@@ -89,13 +90,19 @@ class DMHelper {
 
 		await this.db.add({
 			members: memberLogins,
-			address: channelDb.address.toString()
+			address: channelDb.address.toString(),
+			id
 		});
+
+		this.channels.set(id, channel);
 
 		return channel;
 	}
 
 	async entryToChannel(channelEntry) {
+		if (this.channels.has(channelEntry.id)) 
+			return this.channels.get(channelEntry.id);
+
 		let channelDb = await this.api.orbitdb.kvstore(channelEntry.address, {
 
 		});

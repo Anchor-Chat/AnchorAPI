@@ -37,12 +37,12 @@ declare module "@anchor-chat/anchor-api" {
 		orbitdb: OrbitDB;
 		userLog: any;
 
-		private dmHelper: DMHelper;
+		dmHelper: DMHelper;
 
 		publicKey: string;
 		privateKey: string;
 
-		users: { [key: string]: User }
+		users: Map<string, User>;
 
 		private constructor(userProfile: UserProfile, orbitdb: OrbitDB, ipfs: IPFS, userLog);
 
@@ -53,7 +53,7 @@ declare module "@anchor-chat/anchor-api" {
 		getUserByLogin(login: string): User;
 		getUserData(): Promise<User>;
 
-		getDMChannels(): DMChannel[];
+		getDMChannels(): Promise<DMChannel[]>;
 
 		close(): Promise<void>;
 	}
@@ -154,6 +154,8 @@ declare module "@anchor-chat/anchor-api" {
 		db: any;
 		orbitdb: OrbitDB;
 		api: AnchorAPI;
+
+		channels: Map<string, DMChannel>;
 
 		constructor(db: any, orbitdb: OrbitDB, api: AnchorAPI);
 

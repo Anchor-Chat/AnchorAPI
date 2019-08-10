@@ -2,25 +2,41 @@ const Channel = require("./Channel");
 const Message = require("./Message");
 
 const crypto = require("crypto");
+const uuidv4 = require("uuid/v4");
+const utils = require("../utils");
 
 class TextChannel extends Channel {
-
-	async getMessages() {
-		let msgData = this.channelData.getField("messages");
-		if (msgData.length != this._cache.length) {
-			this._cache = await Promise.all(msgData.map(this._entryIntoMsg, this));
-		}
-		return this._cache;
-	}
-
+	
 	constructor(channelData, api) {
 		super(channelData, api);
 
-		channelData.db.events.on("replicated", () => {
-		//	AnchorAPI.instance.emit();
-		});
+		channelData.db.events.on("replicated", e => this._fetchMsg());
 
-		this._cache = [];
+		this.messages = new Map();
+		this._fetchMsg(true);
+	}
+
+	async _fetchMsg(noEvents) {
+		let msgData = this.channelData.getField("messages");
+
+		let msgNew = msgData.map(m => m.id);
+		let msgOld = Array.from(this.messages.keys());
+		if (!utils.arraysEqual(msgNew, msgOld)) {
+
+			(await Promise.all(msgData.map(this._entryIntoMsg, this))).forEach((m) => {
+				this.messages.set(m.id, m);
+
+				if (!msgOld.includes(m.id) && !noEvents) {
+					this.api.emit("message", m);
+				}
+			});
+
+			// msgOld.forEach(id => {
+			// 	if (!msgNew.includes(id)) {
+			// 		this.api.emit("messageDelete", id);
+			// 	}
+			// });
+		}
 	}
 
 	async _entryIntoMsg(data, _, __, altVerif) {
@@ -38,6 +54,7 @@ class TextChannel extends Channel {
 			author,
 			signature: data.signature,
 			verified,
+			id: data.id,
 			channel: this
 		})
 	}
@@ -56,10 +73,12 @@ class TextChannel extends Channel {
 			content,
 			signature,
 			author: this.api.user.login,
+			id: uuidv4(),
 			options
 		});
 
 		await this.channelData.setField("messages", messages);
+		this._fetchMsg();
 	}
 
 	acknowledge() {

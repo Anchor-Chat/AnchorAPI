@@ -4,6 +4,7 @@ const ChannelData = require("./objects/ChannelData");
 const crypto = require("crypto");
 
 const Reference = require("./Reference");
+const utils = require("./utils");
 
 const uuidv4 = require("uuid/v4");
 
@@ -15,6 +16,9 @@ class DMHelper {
 		this.orbitdb = orbitdb;
 		this.api = api;
 		this.channels = new Map();
+
+		db.events.on("replicated", e => this._fetchMsg());
+		this._fetchMsg(true);
 	}
 
 	static async create(orbitdb, api) {
@@ -28,12 +32,26 @@ class DMHelper {
 		return new DMHelper(dmLog, orbitdb, api);
 	}
 
+	async _fetchMsg(noEvents) {
+		let oldChannels = Array.from(this.channels.keys());
+		let newChannels = (await this.getChannels()).map(c => c.id);
+
+		newChannels.forEach((id) => {
+			if (!oldChannels.includes(id) && !noEvents) {
+				this.api.emit("dmChannelCreate", this.channels.get(id));
+			}
+		});
+
+	}
+
 	async getChannelFor(user) {
+		let arr = user === this.api.user ? [user.login] : [user.login, this.api.user.login];
+
 		let channelEntry = this.db
 			.iterator({ limit: -1 })
 			.collect()
 			.map(e => e.payload.value)
-			.filter(e => this.arraysEqual(e.members, [user.login, this.api.user.login]))[0] || null;
+			.filter(e => utils.arraysEqual(e.members, arr))[0] || null;
 
 		if (channelEntry) {
 			return await this.entryToChannel(channelEntry);
@@ -48,7 +66,7 @@ class DMHelper {
 			.iterator({ limit: -1 })
 			.collect()
 			.map(e => e.payload.value)
-			.filter(e => this.arraysEqual(e.members, memberLogins))[0] || null;
+			.filter(e => utils.arraysEqual(e.members, memberLogins))[0] || null;
 
 		if (channelEntry) {
 			return await this.entryToChannel(channelEntry);
@@ -98,6 +116,8 @@ class DMHelper {
 
 		this.channels.set(id, channel);
 
+		this.api.emit("dmChannelCreate", channel);
+
 		return channel;
 	}
 
@@ -136,22 +156,6 @@ class DMHelper {
 		});
 
 		return Promise.all(promises);
-	}
-
-	arraysEqual(a, b) {
-		if (a === b) return true;
-		if (a == null || b == null) return false;
-		if (a.length != b.length) return false;
-
-		// If you don't care about the order of the elements inside
-		// the array, you should sort both arrays here.
-		// Please note that calling sort on an array will modify that array.
-		// you might want to clone your array first.
-
-		for (var i = 0; i < a.length; ++i) {
-			if (a[i] !== b[i]) return false;
-		}
-		return true;
 	}
 }
 

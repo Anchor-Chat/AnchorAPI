@@ -1,6 +1,6 @@
 {
   "name": "@anchor-chat/anchor-api",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A package that allows you to communicate with the Anchor Chat",
   "main": "src/index.js",
   "browser": "src/browser.js",
@@ -8,6 +8,7 @@
   "scripts": {
     "dist": "npm run build && npm run docs",
     "build": "gulp browserify",
+    "serve": "npx http-server",
     "docs": "mkdir docs && typedoc --out docs --mode modules ./src/",
     "test": "mocha --timeout 200000",
     "prepare": "require-self"

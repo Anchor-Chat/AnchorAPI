@@ -116,10 +116,13 @@ declare module "@anchor-chat/anchor-api" {
 	}
 
 	interface MessageData {
-		content: string
-		signature: string
-		author: string
-		options: MessageOptions
+		content: string;
+		signature: string;
+		
+		author: string;
+		options: MessageOptions;
+
+		id: string;
 	}
 
 	class Message {
@@ -129,10 +132,12 @@ declare module "@anchor-chat/anchor-api" {
 
 		author: User;
 		channel: TextChannel;
+
+		id: string;
 	}
 
 	class TextChannel extends Channel {
-		getMessages(): Message[];
+		messages: Map<string, Message>;
 
 		private _entryIntoMsg(data: MessageData, _, __, altVerif: string): Promise<Message>;
 

@@ -7,6 +7,8 @@ class Message {
 
 		this.author = data.author;
 		this.channel = data.channel;
+		
+		this.id = data.id;
 	}
 
 }

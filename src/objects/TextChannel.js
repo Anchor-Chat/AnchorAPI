@@ -1,4 +1,5 @@
 const Channel = require("./Channel");
+const DMChannel = require("./DMChannel");
 const Message = require("./Message");
 
 const crypto = require("crypto");

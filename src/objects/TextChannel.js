@@ -1,5 +1,4 @@
 const Channel = require("./Channel");
-const DMChannel = require("./DMChannel");
 const Message = require("./Message");
 
 const crypto = require("crypto");
@@ -15,7 +14,7 @@ class TextChannel extends Channel {
 
 		this.messages = new Map();
 
-		if (!(this instanceof DMChannel))
+		if (this.type !== "dm")
 			this._fetchMsg(true);
 	}
 

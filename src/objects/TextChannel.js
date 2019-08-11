@@ -6,14 +6,16 @@ const uuidv4 = require("uuid/v4");
 const utils = require("../utils");
 
 class TextChannel extends Channel {
-	
+
 	constructor(channelData, api) {
 		super(channelData, api);
 
 		channelData.db.events.on("replicated", e => this._fetchMsg());
 
 		this.messages = new Map();
-		this._fetchMsg(true);
+
+		if (!(this instanceof DMChannel))
+			this._fetchMsg(true);
 	}
 
 	async _fetchMsg(noEvents) {

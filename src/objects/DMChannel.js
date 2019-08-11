@@ -11,6 +11,8 @@ class DMChannel extends TextChannel {
 		this.key = crypto.privateDecrypt(api.privateKey, keyEnc);
 
 		this.members = [];
+
+		this._fetchMsg(true);
 	}
 
 	async _init() {

@@ -24,10 +24,10 @@ new AnchorAPIBuilder()
 //	});
 //});
 
-(async () => {
-	window.db = await ob.kvstore("hello", {
-		accessController: {
-			write: ["*"]
-		}
-	});
-})();
+// (async () => {
+// 	window.db = await ob.kvstore("hello", {
+// 		accessController: {
+// 			write: ["*"]
+// 		}
+// 	});
+// })();

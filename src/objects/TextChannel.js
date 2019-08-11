@@ -44,18 +44,18 @@ class TextChannel extends Channel {
 	async _entryIntoMsg(data, _, __, altVerif) {
 		let author = await this.api.getUserData(data.author);
 
-		let verify = crypto.createVerify("RSA-SHA256");
-		verify.update(altVerif || data.content);
-		verify.end();
+		//let verify = crypto.createVerify("RSA-SHA256");
+		//verify.update(altVerif || data.content);
+		//verify.end();
 
-		let pubKey = author.userProfile.getField("publicKey");
+		//let pubKey = author.userProfile.getField("publicKey");
 
-		let verified = verify.verify(pubKey, data.signature, "hex");
+		//let verified = verify.verify(pubKey, data.signature, "hex");
 
 		return new Message(data.content, {
 			author,
 			signature: data.signature,
-			verified,
+			//verified,
 			id: data.id,
 			channel: this
 		})
@@ -64,16 +64,16 @@ class TextChannel extends Channel {
 	async send(content, options, data) {
 		let messages = this.channelData.getField("messages");
 
-		let sign = crypto.createSign("RSA-SHA256");
-		sign.update(content);
-		sign.end();
+		//let sign = crypto.createSign("RSA-SHA256");
+		//sign.update(content);
+		//sign.end();
 
-		let signature = sign.sign(this.api.privateKey, "hex");
+		//let signature = sign.sign(this.api.privateKey, "hex");
 
 		messages.push({
 			...data,
 			content,
-			signature,
+			//signature,
 			author: this.api.user.login,
 			id: uuidv4(),
 			options

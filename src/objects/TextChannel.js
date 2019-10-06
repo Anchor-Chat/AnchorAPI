@@ -1,5 +1,6 @@
 const Channel = require("./Channel");
 const Message = require("./Message");
+const MessagesData = require("./MessagesData");
 
 const crypto = require("crypto");
 const uuidv4 = require("uuid/v4");
@@ -10,35 +11,11 @@ class TextChannel extends Channel {
 	constructor(channelData, api) {
 		super(channelData, api);
 
-		channelData.db.events.on("replicated", e => this._fetchMsg());
-
-		this.messages = new Map();
-
-		if (this.type !== "dm")
-			this._fetchMsg(true);
+		this.messages = new MessagesData(this, api);
 	}
 
-	async _fetchMsg(noEvents) {
-		let msgData = this.channelData.getField("messages");
-
-		let msgNew = msgData.map(m => m.id);
-		let msgOld = Array.from(this.messages.keys());
-		if (!utils.arraysEqual(msgNew, msgOld)) {
-
-			(await Promise.all(msgData.map(this._entryIntoMsg, this))).forEach((m) => {
-				this.messages.set(m.id, m);
-
-				if (!msgOld.includes(m.id) && !noEvents) {
-					this.api.emit("message", m);
-				}
-			});
-
-			// msgOld.forEach(id => {
-			// 	if (!msgNew.includes(id)) {
-			// 		this.api.emit("messageDelete", id);
-			// 	}
-			// });
-		}
+	async _init() {
+		await this.messages.initDB();
 	}
 
 	async _entryIntoMsg(data, _, __, altVerif) {
@@ -61,26 +38,8 @@ class TextChannel extends Channel {
 		})
 	}
 
-	async send(content, options, data) {
-		let messages = this.channelData.getField("messages");
-
-		//let sign = crypto.createSign("RSA-SHA256");
-		//sign.update(content);
-		//sign.end();
-
-		//let signature = sign.sign(this.api.privateKey, "hex");
-
-		messages.push({
-			...data,
-			content,
-			//signature,
-			author: this.api.user.login,
-			id: uuidv4(),
-			options
-		});
-
-		await this.channelData.setField("messages", messages);
-		this._fetchMsg();
+	send(content, options, data) {
+		return this.messages.addMessage(content, options, data);
 	}
 
 	acknowledge() {

@@ -82,7 +82,7 @@ class DMHelper {
 			members.push(this.api.user);
 
 		// TODO: Create custom access controller for DMs
-		let channelDb = await this.orbitdb.kvstore(`Anchor-Chat/dmChannels/${id}`, {
+		let channelDb = await this.orbitdb.kvstore(`Anchor-Chat.channels.${id}`, {
 			accessController: {
 				write: ["*"]
 			}

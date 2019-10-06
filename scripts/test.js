@@ -12,14 +12,24 @@ new AnchorAPIBuilder()
 	.then(async (api) => {
 		console.log("Start")
 
-		//if (api) await api.close();
+		const dm = await ((await api.getUserData("node_person")).createDM());
 
-		//let dm = await ((await api.getUserData("lukas2005")).createDM());
+		//console.log(api);
 
-		console.log(api);
+		api.on("message", async (a) => {
+			let msg = await dm.messages.fetchMessage(a);
+			console.log(msg.content);
+		})
 
+		await dm.send("Hello");
+		await dm.send("Hello2");
+		await dm.send("Hello3");
+
+		console.log((await dm.messages.fetchMessages({ limit: -1 })).map(e => e.content));
+
+		await api.close();
 		console.log("Quit")
-		//process.exit();
+		process.exit();
 	});
 //	});
 //});

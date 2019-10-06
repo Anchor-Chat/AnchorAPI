@@ -38,7 +38,7 @@ class AnchorAPIBuilder {
 
 		this._login = null;
 		this.password = null;
-		
+
 		this.directory = ".anchor";
 	}
 
@@ -67,7 +67,7 @@ class AnchorAPIBuilder {
 	setCredentials(login, password) {
 		this._login = login;
 		this.password = password;
-		
+
 		return this;
 	}
 
@@ -86,9 +86,9 @@ class AnchorAPIBuilder {
      * Internal use only
      */
 	_setDefaults() {
-		return new Promise((resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 			if (!this.ipfs) {
-				this.ipfs = IPFS.createNode({
+				this.ipfs = await IPFS.create({
 					EXPERIMENTAL: {
 						pubsub: true
 					},
@@ -97,47 +97,22 @@ class AnchorAPIBuilder {
 				});
 			}
 
-			this.ipfs.on("error", (err) => {
-				return reject(err);
-			});
-
-			let fun = async () => {
-				if (this.orbitdb === null) {
-					this.orbitdb = await OrbitDB.createInstance(this.ipfs, {
-						directory: path.join(this.directory, ".orbitdb"),
-						AccessControllers: AccessControllers
-					});
-
-					// await api.orbitdb.determineAddress('Anchor-Chat/userLog', 'eventlog', {
-					// 	accessController: {
-					// 		write: ["*"]
-					// 	}
-					// })
-
-					this.userLog = await this.orbitdb.log(Reference.USER_LOG_NAME, {
-						accessController: {
-							write: ["*"]
-						}
-					});
-
-					await this.userLog.load();
-				}
-
-				return resolve();
-			}
-
-			if (!this.ipfs.isOnline()) {
-				this.ipfs.on("ready", async () => {
-					try {
-						await this.ipfs.swarm.connect("/dns4/ams-1.bootstrap.libp2p.io/tcp/443/wss/ipfs/QmSoLer265NRgSp2LA3dPaeykiS1J6DifTC88f5uVQKNAd")
-					} catch (err) {
-						console.log(err);
-					}
-					fun();
+			if (!this.orbitdb) {
+				this.orbitdb = await OrbitDB.createInstance(this.ipfs, {
+					directory: path.join(this.directory, ".orbitdb"),
+					AccessControllers: AccessControllers
 				});
-			} else {
-				fun();
+
+				this.userLog = await this.orbitdb.log(Reference.USER_LOG_NAME, {
+					accessController: {
+						write: ["*"]
+					}
+				});
+
+				await this.userLog.load();
 			}
+
+			return resolve();
 		});
 	}
 
@@ -158,7 +133,7 @@ class AnchorAPIBuilder {
 		}
 
 		// TODO: Create custom access controller for User DBs
-		const userDB = await this.orbitdb.kvstore("Anchor-Chat/" + this._login, {
+		const userDB = await this.orbitdb.kvstore("anchorChat.user." + this._login, {
 			accessController: {
 				//type: "anchorAccessController"
 			}

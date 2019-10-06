@@ -11,11 +11,11 @@ class DMChannel extends TextChannel {
 		this.key = crypto.privateDecrypt(api.privateKey, keyEnc);
 
 		this.members = [];
-
-		this._fetchMsg(true);
 	}
 
 	async _init() {
+		await super._init();
+
 		this.members = await Promise.all(
 			this.channelData.getField("members")
 				.filter(e => e.login !== this.api.user.login)
@@ -27,9 +27,9 @@ class DMChannel extends TextChannel {
 		let decipher = crypto.createDecipheriv("aes256", this.key, data.iv);
 
 		let encrypted = data.content;
-		data.content = decipher.update(data.content, 'hex', 'utf8') + decipher.final('utf8');
+		let decrypted = decipher.update(data.content, 'hex', 'utf8') + decipher.final('utf8');
 
-		return await super._entryIntoMsg(data, null, null, encrypted);
+		return await super._entryIntoMsg({...data, content: decrypted }, null, null, encrypted);
 	}
 
 	async send(content, options) {
@@ -38,7 +38,7 @@ class DMChannel extends TextChannel {
 
 		content = cipher.update(content, 'utf8', 'hex') + cipher.final('hex');
 
-		super.send(content, options, {
+		return await super.send(content, options, {
 			iv
 		});
 	}

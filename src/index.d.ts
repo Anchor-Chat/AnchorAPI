@@ -1,7 +1,6 @@
 import EventEmitter from "eventemitter3";
 import IPFS from "ipfs";
 import OrbitDB from "orbit-db";
-import { options } from "@/router";
 
 declare module "@anchor-chat/anchor-api" {
 
@@ -14,7 +13,7 @@ declare module "@anchor-chat/anchor-api" {
 		_login: string;
 		password: string;
 
-		directory: string; 
+		directory: string;
 
 		constructor();
 
@@ -118,7 +117,7 @@ declare module "@anchor-chat/anchor-api" {
 	interface MessageData {
 		content: string;
 		signature: string;
-		
+
 		author: string;
 		options: MessageOptions;
 
@@ -136,12 +135,25 @@ declare module "@anchor-chat/anchor-api" {
 		id: string;
 	}
 
-	class TextChannel extends Channel {
-		messages: Map<string, Message>;
+	class MessagesData {
+		db: any;
+		channel: TextChannel;
+		api: AnchorAPI;
+
+		constructor(channel: TextChannel, api: AnchorAPI);
+
+		addMessage(content: string, options?: MessageOptions, data?: any): Promise<string>;
+
+		fetchMessage(id: string, options: { limit?: number, reverse?: boolean }): Promise<Message>;
+		fetchMessages(options: { limit?: number, reverse?: boolean }): Promise<Message[]>;
+	}
+
+	export class TextChannel extends Channel {
+		messages: MessagesData;
 
 		private _entryIntoMsg(data: MessageData, _, __, altVerif: string): Promise<Message>;
 
-		send(content: string, options?: MessageOptions, data?: any): Promise<void>
+		send(content: string, options?: MessageOptions, data?: any): Promise<string>;
 	}
 
 	class DMChannel extends TextChannel {
@@ -165,7 +177,7 @@ declare module "@anchor-chat/anchor-api" {
 		constructor(db: any, orbitdb: OrbitDB, api: AnchorAPI);
 
 		static create(orbitdb: OrbitDB, api: AnchorAPI): Promise<DMHelper>;
-	
+
 		getChannelFor(user: User): Promise<DMChannel>;
 		getGroupChannelFor(members: User[]): Promise<DMChannel>;
 		newDMChannel(members: User[]): Promise<DMChannel>;

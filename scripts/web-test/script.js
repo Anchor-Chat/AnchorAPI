@@ -1,7 +1,7 @@
 
 window.login = (login, ipfs) => {
 	new window.anchor.AnchorAPIBuilder()
-		.setCredentials(login, "pass")
+		.setCredentials(login, 'pass')
 		.setDirectory(`.${login}`)
 		.setIPFS(ipfs)
 		.createAccount()
@@ -9,4 +9,4 @@ window.login = (login, ipfs) => {
 		.then(async (api) => {
 			window.api = api;
 		});
-}
+};

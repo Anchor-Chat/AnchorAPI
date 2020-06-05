@@ -1,12 +1,12 @@
-const DMChannel = require("./objects/DMChannel");
-const Channel = require("./objects/Channel");
-const ChannelData = require("./objects/ChannelData");
-const crypto = require("crypto");
+const DMChannel = require('./objects/DMChannel');
+const Channel = require('./objects/Channel');
+const ChannelData = require('./objects/ChannelData');
+const crypto = require('crypto');
 
-const Reference = require("./Reference");
-const utils = require("./utils");
+const Reference = require('./Reference');
+const utils = require('./utils');
 
-const uuidv4 = require("uuid/v4");
+const uuidv4 = require('uuid/v4');
 
 class DMHelper {
 
@@ -17,14 +17,14 @@ class DMHelper {
 		this.api = api;
 		this.channels = new Map();
 
-		db.events.on("replicated", e => this._fetchMsg());
+		db.events.on('replicated', e => this._fetchMsg());
 		this._fetchMsg(true);
 	}
 
 	static async create(orbitdb, api) {
 		let dmLog = await orbitdb.log(Reference.DM_LOG_NAME, {
 			accessController: {
-				write: ["*"]
+				write: ['*']
 			}
 		});
 		await dmLog.load();
@@ -38,7 +38,7 @@ class DMHelper {
 
 		newChannels.forEach((id) => {
 			if (!oldChannels.includes(id) && !noEvents) {
-				this.api.emit("dmChannelCreate", this.channels.get(id));
+				this.api.emit('dmChannelCreate', this.channels.get(id));
 			}
 		});
 
@@ -84,25 +84,25 @@ class DMHelper {
 		// TODO: Create custom access controller for DMs
 		let channelDb = await this.orbitdb.kvstore(`Anchor-Chat.channels.${id}`, {
 			accessController: {
-				write: ["*"]
+				write: ['*']
 			}
 		});
 		await channelDb.load();
 
 		let channelData = new ChannelData(channelDb);
-		await Channel.init(channelData, "dm", id);
+		await Channel.init(channelData, 'dm', id);
 
 		let passphrase = crypto.randomBytes(32);
 		let keys = {};
 
 		members.forEach((member) => {
-			keys[member.login] = crypto.publicEncrypt(member.userProfile.getField("publicKey"), passphrase).toString("hex");
-		})
+			keys[member.login] = crypto.publicEncrypt(member.userProfile.getField('publicKey'), passphrase).toString('hex');
+		});
 
-		await channelData.setField("keys", keys);
+		await channelData.setField('keys', keys);
 
 		let memberLogins = members.map(m => m.login);
-		await channelData.setField("members", memberLogins);
+		await channelData.setField('members', memberLogins);
 
 		let channel = new DMChannel(channelData, this.api);
 
@@ -116,7 +116,7 @@ class DMHelper {
 
 		this.channels.set(id, channel);
 
-		this.api.emit("dmChannelCreate", channel);
+		this.api.emit('dmChannelCreate', channel);
 
 		return channel;
 	}

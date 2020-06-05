@@ -1,7 +1,7 @@
-"use strict";
-const crypto = require("crypto");
+'use strict';
+const crypto = require('crypto');
 
-const algo = "aes256"
+const algo = 'aes256';
 
 class UserProfile {
 
@@ -12,26 +12,26 @@ class UserProfile {
 	}
 
 	keys() {
-		let fields = this.db.get("fields");
+		let fields = this.db.get('fields');
 
 		return Object.keys(fields);
 	}
 
 	values() {
-		let fields = this.db.get("fields");
+		let fields = this.db.get('fields');
 
 		return Object.keys(fields).map((key) => this.getField(key));
 	}
 
 	getField(key) {
-		let fields = this.db.get("fields")
+		let fields = this.db.get('fields');
 		let obj = fields[key] || {};
 
 		if (obj.isPrivate) {
-			if (!this.key) throw new Error("Cipher not provided!");
+			if (!this.key) throw new Error('Cipher not provided!');
 			
 			let decipher = crypto.createDecipheriv(algo, this.key, obj.iv);
-			obj.value = decipher.update(obj.value, "hex", "utf8") + decipher.final("utf8");
+			obj.value = decipher.update(obj.value, 'hex', 'utf8') + decipher.final('utf8');
 		}
 
 		//console.log(obj.value);
@@ -45,25 +45,25 @@ class UserProfile {
 		};
 
 		if (isPrivate && this.key) {
-			let iv = crypto.randomBytes(8).toString("hex");
+			let iv = crypto.randomBytes(8).toString('hex');
 
 			let cipher = crypto.createCipheriv(algo, this.key, iv);
-			entry.value = cipher.update(entry.value, "utf8", "hex") + cipher.final("hex");
+			entry.value = cipher.update(entry.value, 'utf8', 'hex') + cipher.final('hex');
 			entry.iv = iv;
 		} else if (!this.key) {
-			throw new Error("Cipher not provided!");
+			throw new Error('Cipher not provided!');
 		}
 
-		let obj = this.db.get("fields") || {};
+		let obj = this.db.get('fields') || {};
 
 		obj[key] = entry;
 
-		return await this.db.set("fields", obj);
+		return await this.db.set('fields', obj);
 	}
 
 	reEncrypt(newKey) {
 		return new Promise((resolve, reject) => {
-			let fields = this.db.get("fields");
+			let fields = this.db.get('fields');
 
 			Object.keys(fields).forEach(async key => {
 				let value = this.getField(key);
@@ -74,26 +74,26 @@ class UserProfile {
 				await this.setField(key, value, obj.isPrivate);
 			});
 			resolve();
-		})
+		});
 	}
 
 	verifyPass() {
-		try {
+		/*try */{
 			//this.getField("privateKey");
 			return true;
-		} catch (e) {
-			if (e.reason === "bad decrypt") {
+		}/* catch (e) {
+			if (e.reason === 'bad decrypt') {
 				return false;
 			}
 			throw e;
-		}
+		}*/
 	}
 
 	getEntry() {
 		return {
 			login: this.login,
 			address: this.db.address.toString()
-		}
+		};
 	}
 }
 

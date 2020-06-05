@@ -8,17 +8,17 @@ class MessagesData {
 	async initDB() {
 		let msgDb = await this.api.orbitdb.feed(`anchorChat.channels.${this.channel.id}.messages`, {
 			accessController: {
-				write: ["*"]
+				write: ['*']
 			}
 		});
 		await msgDb.load();
 
-		if (!this.channel.channelData.getField("messages")) { 
-			await this.channel.channelData.setField("messages", msgDb.address.toString());
+		if (!this.channel.channelData.getField('messages')) { 
+			await this.channel.channelData.setField('messages', msgDb.address.toString());
 		}
 
-		msgDb.events.on("replicated", e => {
-			this.api.emit("messageChange");
+		msgDb.events.on('replicated', e => {
+			this.api.emit('messageChange');
 		});
 
 		this.db = msgDb;
@@ -66,7 +66,7 @@ class MessagesData {
 		};
 
 		let a = await this.db.add(obj);
-		this.api.emit("message", a);
+		this.api.emit('message', a);
 
 		return a;
 	}
@@ -84,7 +84,7 @@ class MessagesData {
 			.collect();
 
 		return Promise.all(msgEntries
-			.map(e => { e.payload.value.id = e.hash; return e.payload.value })
+			.map(e => { e.payload.value.id = e.hash; return e.payload.value; })
 			.map(this.channel._entryIntoMsg, this.channel)
 		);
 	}

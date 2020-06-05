@@ -1,9 +1,9 @@
-"use strict";
-require("core-js/stable");
-require("regenerator-runtime/runtime");
+'use strict';
+require('core-js/stable');
+require('regenerator-runtime/runtime');
 
 // Main
 module.exports = {
-	AnchorAPIBuilder: require("./AnchorAPIBuilder"),
-	AnchorAPI: require("./AnchorAPI")
-}
+	AnchorAPIBuilder: require('./AnchorAPIBuilder'),
+	AnchorAPI: require('./AnchorAPI')
+};

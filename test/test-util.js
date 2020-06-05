@@ -1,3 +1,4 @@
+/* eslint-disable */
 var fs = require('fs');
 
 module.exports = {
@@ -16,12 +17,12 @@ module.exports = {
 					Gateway: ''
 				}
 			}
-		}
+		};
 	},
 	rmdir(path) {
 		if (fs.existsSync(path)) {
 			fs.readdirSync(path).forEach((file, index) => {
-				let curPath = path + "/" + file;
+				let curPath = path + '/' + file;
 				if (fs.lstatSync(curPath).isDirectory()) { // recurse
 					this.rmdir(curPath);
 				} else { // delete file
@@ -39,18 +40,18 @@ module.exports = {
 
 	let keyPair = await crypto.generateKey(
 		{
-			name: "RSA-OAEP",
+			name: 'RSA-OAEP',
 			modulusLength: 4096,
 			publicExponent: new Uint8Array([1, 0, 1]),
-			hash: "SHA-256"
+			hash: 'SHA-256'
 		},
 		true,
-		["encrypt", "decrypt"]
+		['encrypt', 'decrypt']
 	);
 	
-	var enc = new TextDecoder("utf-8");
+	var enc = new TextDecoder('utf-8');
 
-	console.log(enc.decode(await crypto.exportKey("spki", keyPair.publicKey)));
-	console.log(enc.decode(await crypto.exportKey("pkcs8", keyPair.privateKey)));
+	console.log(enc.decode(await crypto.exportKey('spki', keyPair.publicKey)));
+	console.log(enc.decode(await crypto.exportKey('pkcs8', keyPair.privateKey)));
 
 })();

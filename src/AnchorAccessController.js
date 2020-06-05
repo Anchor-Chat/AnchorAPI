@@ -1,12 +1,12 @@
-"use strict";
-const AnchorAPI = require("./AnchorAPI");
-const AccessController = require("orbit-db-access-controllers/src/access-controller-interface");
+'use strict';
+const AnchorAPI = require('./AnchorAPI');
+const AccessController = require('orbit-db-access-controllers/src/access-controller-interface');
 
 const io = require('orbit-db-io');
 
 class AnchorAccessController extends AccessController {
 
-	static get type() { return "anchorAccessController" };
+	static get type() { return 'anchorAccessController'; }
 
 	constructor(ipfs, options) {
 		super();
@@ -18,7 +18,7 @@ class AnchorAccessController extends AccessController {
 	async canAppend(entry, identityProvider) {
 		const key = entry.identity.id;
 
-		console.log(this.admin)
+		console.log(this.admin);
 
 		if (this.admin === key /*|| (AnchorAPI.instance && AnchorAPI.instance.authenticated())*/) {
 			//check identity is valid
@@ -40,7 +40,7 @@ class AnchorAccessController extends AccessController {
 	}
 
 	async load(address) {
-		if (address.indexOf('/ipfs') === 0) { address = address.split('/')[2] }
+		if (address.indexOf('/ipfs') === 0) { address = address.split('/')[2]; }
 
 		try {
 			this.lock = (await io.read(this.ipfs, address)).lock;
@@ -51,7 +51,7 @@ class AnchorAccessController extends AccessController {
 				this.admin = null;
 			}
 		} catch (e) {
-			console.log('AnchorAccessController.load ERROR:', e)
+			console.log('AnchorAccessController.load ERROR:', e);
 		}
 	}
 

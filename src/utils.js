@@ -7,9 +7,9 @@ module.exports = {
 						return reject(err);
 					}
 					return resolve(res);
-				})
-			})
-		}
+				});
+			});
+		};
 	},
 	arraysEqual(a, b) {
 		if (a === b) return true;
@@ -29,4 +29,4 @@ module.exports = {
 		}
 		return true;
 	}
-}
+};

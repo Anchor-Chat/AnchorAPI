@@ -10,7 +10,7 @@ const babel = require('gulp-babel');
 
 gulp.task('browserify', () => {
 	return browserify({
-		entries: ["./src/index.js"],
+		entries: ['./src/index.js'],
 		debug: true
 	}).transform([
 		babelify
@@ -21,5 +21,5 @@ gulp.task('browserify', () => {
 		.pipe(babel())
 		.pipe(uglify())
 		.pipe(sourcemaps.write())
-		.pipe(gulp.dest("./dist"));
+		.pipe(gulp.dest('./dist'));
 });

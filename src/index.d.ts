@@ -145,7 +145,7 @@ declare module "@anchor-chat/anchor-api" {
 		addMessage(content: string, options?: MessageOptions, data?: any): Promise<string>;
 
 		fetchMessage(id: string, options: { limit?: number, reverse?: boolean }): Promise<Message>;
-		fetchMessages(options: { limit?: number, reverse?: boolean }): Promise<Message[]>;
+		fetchMessages(options?: { limit?: number, reverse?: boolean }): Promise<Message[]>;
 	}
 
 	export class TextChannel extends Channel {

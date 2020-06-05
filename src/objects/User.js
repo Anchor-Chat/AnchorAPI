@@ -5,7 +5,7 @@ class User {
 	}
 
 	get username () {
-		return this.userProfile.getField("username");
+		return this.userProfile.getField('username');
 	}
 
 	constructor(userProfile, api) {

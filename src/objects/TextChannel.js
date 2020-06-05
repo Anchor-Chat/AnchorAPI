@@ -1,10 +1,10 @@
-const Channel = require("./Channel");
-const Message = require("./Message");
-const MessagesData = require("./MessagesData");
+const Channel = require('./Channel');
+const Message = require('./Message');
+const MessagesData = require('./MessagesData');
 
-const crypto = require("crypto");
-const uuidv4 = require("uuid/v4");
-const utils = require("../utils");
+const crypto = require('crypto');
+const uuidv4 = require('uuid/v4');
+const utils = require('../utils');
 
 class TextChannel extends Channel {
 
@@ -35,7 +35,7 @@ class TextChannel extends Channel {
 			//verified,
 			id: data.id,
 			channel: this
-		})
+		});
 	}
 
 	send(content, options, data) {

@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 const EventEmitter = require('eventemitter3');
 
-const UserProfile = require("./objects/UserProfile");
-const User = require("./objects/User");
+const UserProfile = require('./objects/UserProfile');
+const User = require('./objects/User');
 
-const DMHelper = require("./DMHelper");
+const DMHelper = require('./DMHelper');
 
 class AnchorAPI extends EventEmitter {
 
@@ -13,7 +13,7 @@ class AnchorAPI extends EventEmitter {
 	}
 
 	get publicKey() {
-		return this.userProfile.getField("publicKey");
+		return this.userProfile.getField('publicKey');
 	}
 
 	constructor(userProfile, orbitdb, ipfs, userLog) {
@@ -26,7 +26,7 @@ class AnchorAPI extends EventEmitter {
 		this.ipfs = ipfs;
 		this.userLog = userLog;
 
-		this.privateKey = this.userProfile.getField("privateKey");
+		this.privateKey = this.userProfile.getField('privateKey');
 
 		this.users = new Map();
 		this.users.set(this.userProfile.login, new User(this.userProfile, this));
@@ -70,7 +70,7 @@ class AnchorAPI extends EventEmitter {
 		return this.dmHelper.getChannels();
 	}
 
-    /**
+	/**
      * Gets a [[User]] instance by login.
      */
 	async getUserData(login) {
@@ -92,7 +92,7 @@ class AnchorAPI extends EventEmitter {
 			this.users.set(login, user);
 			return user;
 		} else {
-			throw new Error("User doesn't exist!");
+			throw new Error('User doesn\'t exist!');
 		}
 	}
 

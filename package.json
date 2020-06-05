@@ -11,7 +11,7 @@
     "serve": "npx http-server",
     "docs": "mkdir docs && typedoc --out docs --mode modules ./src/",
     "test": "mocha --timeout 200000",
-    "lint": "eslint . --fix"
+    "lint": "eslint . --fix",
     "prepare": "require-self"
   },
   "repository": {

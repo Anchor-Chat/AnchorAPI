@@ -18,7 +18,8 @@ class MessagesData {
 		}
 
 		msgDb.events.on('replicated', e => {
-			this.api.emit('messageChange');
+			console.log('Message DB Replicated: '+msgDb.address);
+			this.api.emit('messageChange', this.channel);
 		});
 
 		this.db = msgDb;

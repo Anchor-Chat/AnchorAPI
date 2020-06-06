@@ -122,7 +122,7 @@ class DMHelper {
 	}
 
 	async entryToChannel(channelEntry) {
-		if (this.channels.has(channelEntry.id)) 
+		if (this.channels.has(channelEntry.id))
 			return this.channels.get(channelEntry.id);
 
 		let channelDb = await this.api.orbitdb.kvstore(channelEntry.address, {

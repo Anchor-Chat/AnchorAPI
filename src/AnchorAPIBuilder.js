@@ -87,13 +87,26 @@ class AnchorAPIBuilder {
      */
 	async _setDefaults() {
 		if (!this.ipfs) {
-			this.ipfs = await IPFS.create({
+			const opts = {
 				EXPERIMENTAL: {
 					pubsub: true
 				},
 				repo: path.join(this.directory, '.jsipfs'),
+				config: {
+					Addresses: {
+						Swarm: [
+							//'/dns4/ws-star.discovery.libp2p.io/ws/p2p-websocket-star'
+						]
+					}
+				},
 				...this.ipfsOpts
-			});
+			};
+
+			if (window !== null) {
+				// opts['libp2p'] = require('./libp2p/libp2p-browser');
+			}
+
+			this.ipfs = await IPFS.create(opts);
 		}
 
 		if (!this.orbitdb) {

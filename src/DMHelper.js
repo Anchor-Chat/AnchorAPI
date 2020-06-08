@@ -8,6 +8,16 @@ const utils = require('./utils');
 
 const uuidv4 = require('uuid/v4');
 
+function once(emitter, event, timeout) {
+	return new Promise((resolve) => {
+		if (timeout) {
+			setTimeout(resolve, timeout);
+		}
+
+		emitter.once(event, resolve);
+	});
+}
+
 class DMHelper {
 
 	constructor(db, orbitdb, api) {
@@ -17,8 +27,8 @@ class DMHelper {
 		this.api = api;
 		this.channels = new Map();
 
-		db.events.on('replicated', e => this._fetchMsg());
-		this._fetchMsg(true);
+		db.events.on('replicated', () => this.fetchChannels());
+		this.fetchChannels();
 	}
 
 	static async create(orbitdb, api) {
@@ -32,13 +42,24 @@ class DMHelper {
 		return new DMHelper(dmLog, orbitdb, api);
 	}
 
-	async _fetchMsg(noEvents) {
-		let oldChannels = Array.from(this.channels.keys());
-		let newChannels = (await this.getChannels()).map(c => c.id);
+	getChannels() {
+		return Array.from(this.channels.values());
+	}
 
-		newChannels.forEach((id) => {
-			if (!oldChannels.includes(id) && !noEvents) {
-				this.api.emit('dmChannelCreate', this.channels.get(id));
+	async fetchChannels() {
+		let channelEntries = this.db
+			.iterator({ limit: -1 })
+			.collect()
+			.map(e => e.payload.value)
+			.filter(e => e.members.includes(this.api.user.login));
+
+		let oldChannelIds = Array.from(this.channels.keys());
+		let channelIds = channelEntries.map(c => c.id);
+
+		channelIds.forEach(async (id) => {
+			if (!oldChannelIds.includes(id)) {
+				let channel = await this.entryToChannel(channelEntries.filter(e => e.id === id)[0]);
+				this.api.emit('dmChannelCreate', channel);
 			}
 		});
 
@@ -54,7 +75,7 @@ class DMHelper {
 			.filter(e => utils.arraysEqual(e.members, arr))[0] || null;
 
 		if (channelEntry) {
-			return await this.entryToChannel(channelEntry);
+			return await this.entryToChannel(channelEntry, true);
 		} else {
 			return await this.newDMChannel([user]);
 		}
@@ -117,11 +138,14 @@ class DMHelper {
 		this.channels.set(id, channel);
 
 		this.api.emit('dmChannelCreate', channel);
+		this.api.emit('dmChannelUpdate');
 
 		return channel;
 	}
 
-	async entryToChannel(channelEntry) {
+	async entryToChannel(channelEntry, existing) {
+		existing = existing || false;
+
 		if (this.channels.has(channelEntry.id))
 			return this.channels.get(channelEntry.id);
 
@@ -130,6 +154,9 @@ class DMHelper {
 		});
 		await channelDb.load();
 
+		if (!existing)
+			await once(channelDb.events, 'replicated', 5000);
+
 		let channelData = new ChannelData(channelDb);
 		let channel = new DMChannel(channelData, this.api);
 
@@ -137,26 +164,11 @@ class DMHelper {
 
 		this.channels.set(channel.id, channel);
 
+		this.api.emit('dmChannelUpdate');
+
 		return channel;
 	}
 
-	getChannels() {
-		let channelEntries = this.db
-			.iterator({ limit: -1 })
-			.collect()
-			.map(e => e.payload.value)
-			.filter(e => e.members.includes(this.api.user.login));
-
-
-		let promises = [];
-		channelEntries.forEach((e) => {
-			promises.push((async () => {
-				return await this.entryToChannel(e);
-			})());
-		});
-
-		return Promise.all(promises);
-	}
 }
 
 module.exports = DMHelper;

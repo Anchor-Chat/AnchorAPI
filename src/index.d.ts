@@ -52,7 +52,7 @@ declare module "@anchor-chat/anchor-api" {
 		getUserByLogin(login: string): User;
 		getUserData(): Promise<User>;
 
-		getDMChannels(): Promise<DMChannel[]>;
+		getDMChannels(): DMChannel[];
 
 		close(): Promise<void>;
 	}
@@ -178,12 +178,14 @@ declare module "@anchor-chat/anchor-api" {
 
 		static create(orbitdb: OrbitDB, api: AnchorAPI): Promise<DMHelper>;
 
+		fetchChannels(): Promise<void>;
+
 		getChannelFor(user: User): Promise<DMChannel>;
 		getGroupChannelFor(members: User[]): Promise<DMChannel>;
 		newDMChannel(members: User[]): Promise<DMChannel>;
 
 		private entryToChannel(channelEntry: DMChannelEntry): Promise<DMChannel>;
 
-		getChannels(): Promise<DMChannel[]>;
+		getChannels(): DMChannel[];
 	}
 }

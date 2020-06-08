@@ -14,8 +14,8 @@ module.exports = {
 		'ecmaVersion': 11
 	},
 	'rules': {
-		'no-console': process.env.NODE_ENV  === 'production' ? ['error'] : ['off'],
-		'no-debugger': process.env.NODE_ENV === 'production' ? ['error'] : ['off'],
+		'no-console': process.env.NODE_ENV  === 'x' ? ['warn'] : ['off'],
+		'no-debugger': process.env.NODE_ENV === 'x' ? ['warn'] : ['off'],
 		'indent': ['error','tab'],
 		'linebreak-style': ['error', 'unix'],
 		'quotes': ['error','single'],

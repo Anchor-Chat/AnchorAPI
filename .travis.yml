@@ -5,13 +5,13 @@ cache: yarn
 before_install:
   - yarn policies set-version berry
 
-install:
-  - |
-    if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-      yarn install --immutable --immutable-cache
-    else
-      yarn install --immutable --immutable-cache --check-cache
-    fi
+# install:
+#   - |
+#     if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+#       yarn install --immutable --immutable-cache
+#     else
+#       yarn install --immutable --immutable-cache --check-cache
+#     fi
 
 script: 
   - yarn dist

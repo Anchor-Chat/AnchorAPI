@@ -145,3 +145,10 @@ $RECYCLE.BIN/
 */.anchor*
 /src-ts
 *.a*
+
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/pnpify
+!.yarn/versions

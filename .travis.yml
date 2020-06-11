@@ -1,7 +1,7 @@
 language: node_js
 node_js: '10'
-cache: npm
-script: npm run dist
+cache: yarn
+script: yarn dist
 after_success:
   - mkdir dist/docs/dist && cp -R dist/browser/* dist/docs/dist
 deploy:

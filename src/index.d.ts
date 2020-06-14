@@ -156,6 +156,10 @@ declare module "@anchor-chat/anchor-api" {
 		send(content: string, options?: MessageOptions, data?: any): Promise<string>;
 	}
 
+	class DMChannelOptions {
+		passphraseLength: number;
+	}
+
 	class DMChannel extends TextChannel {
 		members: User[];
 
@@ -180,9 +184,9 @@ declare module "@anchor-chat/anchor-api" {
 
 		fetchChannels(): Promise<void>;
 
-		getChannelFor(user: User): Promise<DMChannel>;
-		getGroupChannelFor(members: User[]): Promise<DMChannel>;
-		newDMChannel(members: User[]): Promise<DMChannel>;
+		getChannelFor(user: User          , options?: DMChannelOptions): Promise<DMChannel>;
+		getGroupChannelFor(members: User[], options?: DMChannelOptions): Promise<DMChannel>;
+		newDMChannel(members: User[]      , options?: DMChannelOptions): Promise<DMChannel>;
 
 		private entryToChannel(channelEntry: DMChannelEntry): Promise<DMChannel>;
 

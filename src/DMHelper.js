@@ -65,7 +65,7 @@ class DMHelper {
 
 	}
 
-	async getChannelFor(user) {
+	async getChannelFor(user, options) {
 		let arr = user === this.api.user ? [user.login] : [user.login, this.api.user.login];
 
 		let channelEntry = this.db
@@ -77,11 +77,11 @@ class DMHelper {
 		if (channelEntry) {
 			return await this.entryToChannel(channelEntry, true);
 		} else {
-			return await this.newDMChannel([user]);
+			return await this.newDMChannel([user], options);
 		}
 	}
 
-	async getGroupChannelFor(members) {
+	async getGroupChannelFor(members, options) {
 		let memberLogins = members.map(m => m.login);
 		let channelEntry = this.db
 			.iterator({ limit: -1 })
@@ -92,11 +92,11 @@ class DMHelper {
 		if (channelEntry) {
 			return await this.entryToChannel(channelEntry);
 		} else {
-			return await this.newDMChannel(members);
+			return await this.newDMChannel(members, options);
 		}
 	}
 
-	async newDMChannel(members) {
+	async newDMChannel(members, options) {
 		let id = uuidv4();
 
 		if (!members.includes(this.api.user))
@@ -113,7 +113,7 @@ class DMHelper {
 		let channelData = new ChannelData(channelDb);
 		await Channel.init(channelData, 'dm', id);
 
-		let passphrase = crypto.randomBytes(4096);
+		let passphrase = crypto.randomBytes(options.passphraseLength || 4096);
 		let keys = {};
 
 		members.forEach((member) => {

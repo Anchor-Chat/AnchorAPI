@@ -3281,7 +3281,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ]],
       ["browser-keygen", [
         ["npm:1.0.5", {
-          "packageLocation": "./.yarn/cache/browser-keygen-npm-1.0.5-7978bddca2-d9fa1262af.zip/node_modules/browser-keygen/",
+          "packageLocation": "./.yarn/unplugged/browser-keygen-npm-1.0.5-7978bddca2/node_modules/browser-keygen/",
           "packageDependencies": [
             ["browser-keygen", "npm:1.0.5"]
           ],

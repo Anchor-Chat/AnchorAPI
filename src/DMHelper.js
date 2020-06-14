@@ -113,7 +113,7 @@ class DMHelper {
 		let channelData = new ChannelData(channelDb);
 		await Channel.init(channelData, 'dm', id);
 
-		let passphrase = crypto.randomBytes(32);
+		let passphrase = crypto.randomBytes(4096);
 		let keys = {};
 
 		members.forEach((member) => {
